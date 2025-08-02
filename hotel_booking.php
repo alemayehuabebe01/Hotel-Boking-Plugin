@@ -42,11 +42,18 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotel-attributes-cpt.php' );
             $Nehabi_Hotel_Attributes_CPT = New Nehabi_Hotel_Attributes_CPT();
 
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotel-rooms-cpt.php' );
+            $Nehabi_Hotel_Rooms_CPT = New Nehabi_Hotel_Rooms_CPT();
+
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/admin_pages/class.nehabi-submenu-pages.php' );
+            $Nehabi_Hotel_Booking_Admin_Pages = New Nehabi_Hotel_Admin_Pages();
+
             require_once( Nehabi_Hotel_Booking_PATH . 'app/taxonomy/class.nehabi-hotel-accommodation-tax.php' );
             $Nehabi_Hotel_Taxonomies = New Nehabi_Hotel_Taxonomies();
 
 
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
+           
 
         }
 
@@ -74,6 +81,8 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             define ( 'Nehabi_Hotel_Booking_VERSION', '1.0.0' );   
 
         }
+
+        
 
  
         //Activate hook to register the custom post type.
