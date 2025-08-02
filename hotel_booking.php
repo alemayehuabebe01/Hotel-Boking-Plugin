@@ -39,6 +39,10 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotal-accommodation-cpt.php' );
             $Nehabi_Hotel_Accommodation = New Nehabi_Hotel_Accommodation_CPT();
 
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/taxonomy/class.nehabi-hotel-accommodation-tax.php' );
+            $Nehabi_Hotel_Taxonomies = New Nehabi_Hotel_Taxonomies();
+
+
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
 
         }
