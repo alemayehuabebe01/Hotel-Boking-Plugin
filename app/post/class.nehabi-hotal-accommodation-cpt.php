@@ -54,6 +54,8 @@ if (!class_exists('Nehabi_Hotel_Accommodation_CPT')) {
                     'show_in_rest' => true,
                 )
             );
+
+            
         }
     }
 
