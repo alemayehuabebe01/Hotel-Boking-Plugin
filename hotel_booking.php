@@ -48,6 +48,9 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/admin_pages/class.nehabi-submenu-pages.php' );
             $Nehabi_Hotel_Booking_Admin_Pages = New Nehabi_Hotel_Admin_Pages();
 
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/meta/class.nehabi-hotel-accommodation-metaboxes.php' );
+            $Nehabi_Accommodation_Metaboxes = New Nehabi_Accommodation_Metaboxes();
+
             require_once( Nehabi_Hotel_Booking_PATH . 'app/taxonomy/class.nehabi-hotel-accommodation-tax.php' );
             $Nehabi_Hotel_Taxonomies = New Nehabi_Hotel_Taxonomies();
 
