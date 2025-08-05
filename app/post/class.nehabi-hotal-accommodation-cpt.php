@@ -4,7 +4,14 @@ if (!class_exists('Nehabi_Hotel_Accommodation_CPT')) {
     class Nehabi_Hotel_Accommodation_CPT {
 
         public function __construct() {
-            add_action('init', array($this, 'register_accommodation_cpt'));   
+            add_action('init', array($this, 'register_accommodation_cpt'));  
+            
+            add_filter( 'use_block_editor_for_post_type', function( $use_block_editor, $post_type ) {
+                if ( $post_type === 'accommodation' ) {
+                    return false;
+                }
+                return $use_block_editor;
+            }, 10, 2 ); 
         }
 
         public function register_accommodation_cpt() {

@@ -54,6 +54,9 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/taxonomy/class.nehabi-hotel-accommodation-tax.php' );
             $Nehabi_Hotel_Taxonomies = New Nehabi_Hotel_Taxonomies();
 
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/meta/class.nehabi-hotel-accommodation-capacity-metaboxe.php' );
+            $Nehabi_Accommodation_Capacity_Metaboxes = New Nehabi_Accommodation_Capacity_Metaboxes();
+
 
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
            
