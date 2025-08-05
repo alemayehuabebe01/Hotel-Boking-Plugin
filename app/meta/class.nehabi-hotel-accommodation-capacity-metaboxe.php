@@ -93,8 +93,23 @@
             
              
 
-             if (isset($_POST['accommodation_count'])) {
-                update_post_meta($post_id, '_accommodation_count', intval($_POST['accommodation_count']));
+             if (isset($_POST['accommodation_adults'])) {
+                update_post_meta($post_id, '_accommodation_adults', intval($_POST['accommodation_adults']));
+             }
+             if (isset($_POST['accommodation_children'])) {
+                update_post_meta($post_id, '_accommodation_children', intval($_POST['accommodation_children']));
+             }
+
+             if (isset($_POST['accommodation_capacity'])) {
+                update_post_meta($post_id, '_accommodation_capacity', intval($_POST['accommodation_capacity']));
+             }
+
+             if (isset($_POST['accommodation_base_adults'])) {
+                update_post_meta($post_id, '_accommodation_base_adults', intval($_POST['accommodation_base_adults']));
+             }
+
+             if (isset($_POST['accommodation_base_children'])) {
+                update_post_meta($post_id, '_accommodation_base_children', intval($_POST['accommodation_base_children']));
              }
  
   

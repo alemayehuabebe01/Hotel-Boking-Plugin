@@ -34,6 +34,8 @@
             wp_nonce_field('nehabi_accommodation_nonce_action', 'nehabi_accommodation_nonce');
 
             $count = get_post_meta($post->ID, '_accommodation_size', true);
+            $view = get_post_meta($post->ID, '_accommodation_view', true);
+            $bed_type = get_post_meta($post->ID, '_accommodation_bed_type', true);
             $count = ($count !== '') ? intval($count) : 1; // default to 1
             ?>
             <div style="margin-top: 15px;">
@@ -62,7 +64,7 @@
                 <input type="text"
                     id="accommodation_view"
                     name="accommodation_view"
-                    value=""
+                    value="<?php echo esc_attr($view); ?>"
                     style="width: 500px; padding: 4px 8px; font-size: 14px; border: 1px solid #ccd0d4; border-radius: 4px;"
                     >
                     
@@ -79,9 +81,9 @@
                 </label>
 
                 <input type="text"
-                    id="accommodation_size"
-                    name="accommodation_size"
-                    value=""
+                    id="accommodation_bed_type"
+                    name="accommodation_bed_type"
+                    value="<?php echo esc_attr($bed_type); ?>"
                     style="width: 500px; padding: 4px 8px; font-size: 14px; border: 1px solid #ccd0d4; border-radius: 4px;" />
 
                 <p style="color: #6c757d; font-size: 13px; margin-top: 4px;">
@@ -105,6 +107,14 @@
 
              if (isset($_POST['accommodation_size'])) {
                 update_post_meta($post_id, '_accommodation_size', intval($_POST['accommodation_size']));
+             }
+
+             if (isset($_POST['accommodation_view'])) {
+                update_post_meta($post_id, '_accommodation_view', intval($_POST['accommodation_view']));
+             }
+
+             if (isset($_POST['accommodation_bed_type'])) {
+                update_post_meta($post_id, '_accommodation_bed_type', intval($_POST['accommodation_bed_type']));
              }
  
   
