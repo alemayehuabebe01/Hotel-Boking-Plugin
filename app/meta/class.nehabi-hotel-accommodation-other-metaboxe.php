@@ -37,6 +37,7 @@
             $view = get_post_meta($post->ID, '_accommodation_view', true);
             $bed_type = get_post_meta($post->ID, '_accommodation_bed_type', true);
             $count = ($count !== '') ? intval($count) : 1; // default to 1
+
             ?>
             <div style="margin-top: 15px;">
                 <label for="accommodation_size" style="font-weight: 600; font-size: 14px; display: inline-block; margin-bottom: 8px;">
@@ -64,12 +65,10 @@
                 <input type="text"
                     id="accommodation_view"
                     name="accommodation_view"
-                    value="<?php echo esc_attr($view); ?>"
+                    value="<?php echo esc_url($view); ?>"
                     style="width: 500px; padding: 4px 8px; font-size: 14px; border: 1px solid #ccd0d4; border-radius: 4px;"
                     >
                     
-                     
-
                 <p style="color: #6c757d; font-size: 13px; margin-top: 4px;">
                     City view, seaside, swimming pool etc.
                 </p>
