@@ -45,6 +45,9 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotel-rooms-cpt.php' );
             $Nehabi_Hotel_Rooms_CPT = New Nehabi_Hotel_Rooms_CPT();
 
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotel-booking-payment-history-cpt.php' );
+            $Nehabi_Hotel_Booking_Payment_CPT = New Nehabi_Hotel_Booking_Payment_CPT();
+
             require_once( Nehabi_Hotel_Booking_PATH . 'app/admin_pages/class.nehabi-submenu-pages.php' );
             $Nehabi_Hotel_Booking_Admin_Pages = New Nehabi_Hotel_Admin_Pages();
 

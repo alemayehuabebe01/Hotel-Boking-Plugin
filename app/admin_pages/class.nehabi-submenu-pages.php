@@ -33,6 +33,36 @@ if (!class_exists('Nehabi_Hotel_Admin_Pages')) {
                 'accommodation-shortcodes',
                 array($this, 'render_shortcodes_page')
             );
+
+               //booking cpt submenu added here 
+            add_submenu_page(
+                'edit.php?post_type=nehabi-hotel-booking',
+                __('Calander', 'hotel-booking'),
+                __('Calander', 'hotel-booking'),
+                'manage_options',
+                'accommodation-calander',
+                array($this, 'render_calander_page')
+            );
+
+            add_submenu_page(
+                'edit.php?post_type=nehabi-hotel-booking',
+                __('Accommodation Customers', 'hotel-booking'),
+                __('Customer', 'hotel-booking'),
+                'manage_options',
+                'accommodation-customer',
+                array($this, 'render_customer_page')
+            );
+
+            add_submenu_page(
+                'edit.php?post_type=nehabi-hotel-booking',
+                __('Accommodation Report', 'hotel-booking'),
+                __('Report', 'hotel-booking'),
+                'manage_options',
+                'accommodation-report',
+                array($this, 'render_report_page')
+            );
+
+            
         }
 
         public function render_settings_page() {
@@ -49,6 +79,30 @@ if (!class_exists('Nehabi_Hotel_Admin_Pages')) {
             }
 
             require_once(Nehabi_Hotel_Booking_PATH . 'views/templates/nehabi-hotel-accommodation-shortcode.php');
+        }
+
+        public function render_customer_page() {
+            if (!current_user_can('manage_options')) {
+                wp_die(__('You do not have sufficient permissions to access this page.'));
+            }
+
+            require_once(Nehabi_Hotel_Booking_PATH . 'views/templates/nehabi-hotel-booking-customer.php');
+        }
+
+        public function render_report_page() {
+            if (!current_user_can('manage_options')) {
+                wp_die(__('You do not have sufficient permissions to access this page.'));
+            }
+
+            require_once(Nehabi_Hotel_Booking_PATH . 'views/templates/nehabi-hotel-booking-report.php');
+        }
+
+        public function render_calander_page() {
+            if (!current_user_can('manage_options')) {
+                wp_die(__('You do not have sufficient permissions to access this page.'));
+            }
+
+            require_once(Nehabi_Hotel_Booking_PATH . 'views/templates/nehabi-hotel-booking-calander.php');
         }
 
          
