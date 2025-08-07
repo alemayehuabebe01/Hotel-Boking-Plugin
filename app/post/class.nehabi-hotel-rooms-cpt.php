@@ -6,6 +6,13 @@ if (!class_exists('Nehabi_Hotel_Rooms_CPT')) {
         public function __construct() {
             add_action('init', array($this, 'register_rooms_cpt')); 
             add_action('admin_menu', array($this, 'adjust_menu_position')); 
+            add_filter( 'use_block_editor_for_post_type', function( $use_block_editor, $post_type ) {
+                if ( $post_type === 'nh_rooms' ) {
+                    return false;
+                }
+                return $use_block_editor;
+            }, 10, 2 );
+            add_action('add_meta_boxes', array($this,'remove_unwanted_metaboxes'), 100);
         }
 
         public function register_rooms_cpt() {
@@ -51,6 +58,32 @@ if (!class_exists('Nehabi_Hotel_Rooms_CPT')) {
                 'manage_options',                   // Capability
                 'edit.php?post_type=nh_rooms'       // Submenu link (must match CPT slug)
             );
+        }
+
+       
+
+        public function remove_unwanted_metaboxes() {
+            $post_type = 'nh_rooms';
+
+            // Default WordPress boxes
+           // remove_meta_box('submitdiv', $post_type, 'side'); // Publish box
+           // remove_meta_box('slugdiv', $post_type, 'normal'); // Slug editor
+           remove_meta_box('postimagediv', $post_type, 'side'); // Featured image
+           //remove_meta_box('postexcerpt', $post_type, 'normal'); // Excerpt
+            remove_meta_box('trackbacksdiv', $post_type, 'normal');
+            remove_meta_box('commentstatusdiv', $post_type, 'normal');
+            remove_meta_box('commentsdiv', $post_type, 'normal');
+            remove_meta_box('revisionsdiv', $post_type, 'normal');
+            remove_meta_box('authordiv', $post_type, 'normal');
+            remove_meta_box('pageparentdiv', $post_type, 'side'); // For hierarchical CPTs
+            remove_meta_box('postcustom', $post_type, 'normal');
+
+            // Remove Astra Settings metabox
+            remove_meta_box('astra_settings_meta_box', $post_type, 'normal');
+
+            // Custom plugin metaboxes (example: Yoast, ACF, etc.)
+            remove_meta_box('wpseo_meta', $post_type, 'normal'); // Yoast SEO
+            remove_meta_box('acf-group_123abc', $post_type, 'normal'); // ACF by ID
         }
     }
 }

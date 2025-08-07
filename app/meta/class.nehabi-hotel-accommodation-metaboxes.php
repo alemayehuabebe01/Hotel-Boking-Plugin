@@ -11,8 +11,8 @@
         public function __construct(){
             add_action( 'add_meta_boxes', array( $this , 'nehabi_accommodation_metaboxes' ) );
             add_action( 'save_post', array( $this , 'nehabi_accommodation_metaboxes_save' ) );
-            add_action( 'manage_accommodation_posts_columns', array( $this, 'add_columns' ) );
-            add_filter('manage_accommodation_posts_custom_column', array($this, 'output_column_content'),10,2 );
+            //add_action( 'manage_accommodation_posts_columns', array( $this, 'add_columns' ) );
+           // add_filter('manage_accommodation_posts_custom_column', array($this, 'output_column_content'),10,2 );
             add_action('admin_enqueue_scripts', array($this, 'enqueue_accommodation_cpt_admin_styles' ));
             add_filter('post_row_actions', function($actions, $post) {
                 if ($post->post_type === 'accommodation') { // Change to your CPT slug

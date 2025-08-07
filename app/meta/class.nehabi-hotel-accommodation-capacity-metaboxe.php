@@ -179,7 +179,7 @@
             $columns['taxonomy-accommodation_tag'] = __('Accommodation Tags', 'accommodation');
             $columns['taxonomy-accommodation_amenity'] = __('Amenities', 'accommodation');
             $columns['accommodation_bed_type'] = __('Bed Type', 'accommodation');
-           // $columns['subscription_signup_fee'] = __('Capacity', 'accommodation');
+            $columns['accommodation_children'] = __('Capacity', 'accommodation');
             
             
             $columns['date'] = __('Date', 'accommodation');
@@ -196,9 +196,18 @@
          public function output_column_content($column, $post_id){
              
             switch( $column ) {
+               case 'accommodation_children':
+                    $accommodation_children = get_post_meta($post_id, '_accommodation_children', true);
+                    $accommodation_adults   = get_post_meta($post_id, '_accommodation_adults', true);
+                    $accommodation_size     = get_post_meta($post_id, '_accommodation_size', true);
+
+                    echo '<strong>Adults:</strong> ' . esc_html($accommodation_adults) . '<br>';
+                    echo '<strong>Children:</strong> ' . esc_html($accommodation_children) . '<br>';
+                    echo '<strong>Size:</strong> ' . esc_html($accommodation_size) . 'm²<br>';
+                   break; 
                case 'accommodation_bed_type':
-                   $bed_type = get_post_meta($post_id, '_accommodation_bed_type', true);
-                   echo esc_html($bed_type);
+                    $bed_type = get_post_meta($post_id, '_accommodation_bed_type', true);
+                    echo esc_html($bed_type);
                    break; 
                         
                         
