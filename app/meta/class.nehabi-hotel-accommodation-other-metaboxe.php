@@ -12,8 +12,8 @@
 
             add_action( 'add_meta_boxes', array( $this , 'nehabi_accommodation_other_metaboxes' ) );
             add_action( 'save_post', array( $this , 'nehabi_accommodation_other_metaboxes_save' ) );
-            add_action( 'manage_accommodation_posts_columns', array( $this, 'add_columns' ) );
-            add_filter('manage_accommodation_posts_custom_column', array($this, 'output_column_content'),10,2 );
+            // add_action( 'manage_accommodation_posts_columns', array( $this, 'add_columns' ) );
+            // add_filter('manage_accommodation_posts_custom_column', array($this, 'output_column_content'),10,2 );
        
           }
 
@@ -35,7 +35,7 @@
 
             $count = get_post_meta($post->ID, '_accommodation_size', true);
             $view = get_post_meta($post->ID, '_accommodation_view', true);
-            $bed_type = get_post_meta($post->ID, '_accommodation_bed_type', true);
+           
             $count = ($count !== '') ? intval($count) : 1; // default to 1
 
             ?>
@@ -74,21 +74,7 @@
                 </p>
             </div>
 
-            <div style="margin-top: 15px;">
-                <label for="accommodation_size" style="font-weight: 600; font-size: 14px; display: inline-block; margin-bottom: 8px;">
-                   Bed Type:
-                </label>
-
-                <input type="text"
-                    id="accommodation_bed_type"
-                    name="accommodation_bed_type"
-                    value="<?php echo esc_attr($bed_type); ?>"
-                    style="width: 500px; padding: 4px 8px; font-size: 14px; border: 1px solid #ccd0d4; border-radius: 4px;" />
-
-                <p style="color: #6c757d; font-size: 13px; margin-top: 4px;">
-                    Set bed types list in.
-                </p>
-            </div>
+             
             <?php
 
 
@@ -112,9 +98,9 @@
                 update_post_meta($post_id, '_accommodation_view', $_POST['accommodation_view']);
              }
 
-             if (isset($_POST['accommodation_bed_type'])) {
-                update_post_meta($post_id, '_accommodation_bed_type', $_POST['accommodation_bed_type']);
-             }
+            //  if (isset($_POST['accommodation_bed_type'])) {
+            //     update_post_meta($post_id, '_accommodation_bed_type', $_POST['accommodation_bed_type']);
+            //  }
  
   
          }
@@ -138,52 +124,38 @@
          * add columns to data tables
         */
 
-        public function add_columns( $columns ){
+        // public function add_columns( $columns ){
 
-            /**
-             * to overide the default columns
-             */
-              unset($columns['date']);
-              unset($columns['title']);
-              if (isset($columns['taxonomy-branch_location'])) {
-                // remove the branch location column if it exists
-                unset($columns['taxonomy-branch_location']);
-
-                }
-              
-              
-              //unset($columns['subscription_price']);
+        // /**
+        //  * to overide the default columns
+        //  */
+        //     unset($columns['date']);
+        //     unset($columns['title']);
+            
+        //     //unset($columns['subscription_price']);
          
-            $columns['post_id'] = __('ID', 'subscription_plan');     
-            $columns['title'] = __('Plan', 'subscription_plan');
-            $columns['subscription_price'] = __('Price', 'subscription_plan');
-            $columns['subscription_signup_fee'] = __('Sign Up Fee', 'subscription_plan');
-            $columns['subscription_free_trial'] = __('Free Trial', 'subscription_plan');
-            $columns['subscription_status'] = __('Status', 'subscription_plan');
+        //     $columns['date'] = __('Date', 'subscription_plan');
             
-            $columns['date'] = __('Date', 'subscription_plan');
-            
-            return $columns;
+        //     return $columns;
 
 
-        } 
+        // } 
 
         /**
          * output Table column values
          */
 
-         public function output_column_content($column, $post_id){
+        //  public function output_column_content($column, $post_id){
              
-            switch( $column ) {
-               
-                        
+        //     switch( $column ) {
+                 
                     
-                default:
-                    break;
-            }
+        //         default:
+        //             break;
+        //     }
 
         
-         }
+        //  }
         
 
   

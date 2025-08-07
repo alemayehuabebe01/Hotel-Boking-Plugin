@@ -37,7 +37,8 @@
             $capacity = get_post_meta($post->ID, '_accommodation_capacity', true) ?: '';
             $base_adults = get_post_meta($post->ID, '_accommodation_base_adults', true) ?: '';
             $base_children = get_post_meta($post->ID, '_accommodation_base_children', true) ?: '';
-            
+            $bed_type = get_post_meta($post->ID, '_accommodation_bed_type', true);
+
             ?>
 
             <table class="form-table">
@@ -76,6 +77,24 @@
                             <p class="description">Optional starting value for seasonal pricing calculations.</p>
                         </td>
                     </tr>
+                    <tr>
+                         <th scope="row">
+                            <label for="accommodation_bed_type" style="font-weight: 600; font-size: 14px;">
+                                Bed Type:
+                            </label>
+                        </th>
+                        <td>
+                            <input type="text"
+                                id="accommodation_bed_type"
+                                name="accommodation_bed_type"
+                                value="<?php echo esc_attr($bed_type); ?>"
+                                style="width: 500px; padding: 4px 8px; font-size: 14px; border: 1px solid #ccd0d4; border-radius: 4px;" />
+
+                            <p style="color: #6c757d; font-size: 13px; margin-top: 4px;">
+                                Set bed types list in.
+                            </p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -111,6 +130,9 @@
 
              if (isset($_POST['accommodation_base_children'])) {
                 update_post_meta($post_id, '_accommodation_base_children', intval($_POST['accommodation_base_children']));
+             }
+             if (isset($_POST['accommodation_bed_type'])) {
+                update_post_meta($post_id, '_accommodation_bed_type', $_POST['accommodation_bed_type']);
              }
  
   
@@ -156,9 +178,9 @@
             $columns['taxonomy-accommodation_category'] = __('Accommodation Categories', 'accommodation');
             $columns['taxonomy-accommodation_tag'] = __('Accommodation Tags', 'accommodation');
             $columns['taxonomy-accommodation_amenity'] = __('Amenities', 'accommodation');
-            $columns['subscription_signup_fee'] = __('Capacity', 'accommodation');
             $columns['accommodation_bed_type'] = __('Bed Type', 'accommodation');
-            $columns['subscription_status'] = __('Status', 'accommodation');
+           // $columns['subscription_signup_fee'] = __('Capacity', 'accommodation');
+            
             
             $columns['date'] = __('Date', 'accommodation');
             
@@ -176,8 +198,9 @@
             switch( $column ) {
                case 'accommodation_bed_type':
                    $bed_type = get_post_meta($post_id, '_accommodation_bed_type', true);
-                    echo esc_html($bed_type);
-                   break;
+                   echo esc_html($bed_type);
+                   break; 
+                        
                         
                     
                 default:
