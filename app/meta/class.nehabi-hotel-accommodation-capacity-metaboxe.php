@@ -37,6 +37,7 @@
             $capacity = get_post_meta($post->ID, '_accommodation_capacity', true) ?: '';
             $base_adults = get_post_meta($post->ID, '_accommodation_base_adults', true) ?: '';
             $base_children = get_post_meta($post->ID, '_accommodation_base_children', true) ?: '';
+            
             ?>
 
             <table class="form-table">
