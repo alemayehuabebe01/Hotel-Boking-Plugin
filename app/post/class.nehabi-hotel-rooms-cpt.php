@@ -70,20 +70,16 @@ if (!class_exists('Nehabi_Hotel_Rooms_CPT')) {
            // remove_meta_box('slugdiv', $post_type, 'normal'); // Slug editor
            remove_meta_box('postimagediv', $post_type, 'side'); // Featured image
            //remove_meta_box('postexcerpt', $post_type, 'normal'); // Excerpt
-            remove_meta_box('trackbacksdiv', $post_type, 'normal');
-            remove_meta_box('commentstatusdiv', $post_type, 'normal');
-            remove_meta_box('commentsdiv', $post_type, 'normal');
-            remove_meta_box('revisionsdiv', $post_type, 'normal');
-            remove_meta_box('authordiv', $post_type, 'normal');
-            remove_meta_box('pageparentdiv', $post_type, 'side'); // For hierarchical CPTs
+            //remove_meta_box('trackbacksdiv', $post_type, 'normal');
+            //remove_meta_box('commentstatusdiv', $post_type, 'normal');
+            //remove_meta_box('commentsdiv', $post_type, 'normal');
+            //remove_meta_box('revisionsdiv', $post_type, 'normal');
+            //remove_meta_box('authordiv', $post_type, 'normal');
+            //remove_meta_box('pageparentdiv', $post_type, 'side'); // For hierarchical CPTs
             remove_meta_box('postcustom', $post_type, 'normal');
 
             // Remove Astra Settings metabox
             remove_meta_box('astra_settings_meta_box', $post_type, 'normal');
-
-            // Custom plugin metaboxes (example: Yoast, ACF, etc.)
-            remove_meta_box('wpseo_meta', $post_type, 'normal'); // Yoast SEO
-            remove_meta_box('acf-group_123abc', $post_type, 'normal'); // ACF by ID
         }
     }
 }
