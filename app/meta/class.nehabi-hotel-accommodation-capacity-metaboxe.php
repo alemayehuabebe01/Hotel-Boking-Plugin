@@ -150,14 +150,16 @@
               
               //unset($columns['subscription_price']);
          
-            $columns['post_id'] = __('ID', 'subscription_plan');     
-            $columns['title'] = __('Plan', 'subscription_plan');
-            $columns['subscription_price'] = __('Price', 'subscription_plan');
-            $columns['subscription_signup_fee'] = __('Sign Up Fee', 'subscription_plan');
-            $columns['subscription_free_trial'] = __('Free Trial', 'subscription_plan');
-            $columns['subscription_status'] = __('Status', 'subscription_plan');
+                
+            $columns['title'] = __('Title', 'accommodation');
+            $columns['taxonomy-accommodation_category'] = __('Accommodation Categories', 'accommodation');
+            $columns['taxonomy-accommodation_tag'] = __('Accommodation Tags', 'accommodation');
+            $columns['taxonomy-accommodation_amenity'] = __('Amenities', 'accommodation');
+            $columns['subscription_signup_fee'] = __('Capacity', 'accommodation');
+            $columns['accommodation_bed_type'] = __('Bed Type', 'accommodation');
+            $columns['subscription_status'] = __('Status', 'accommodation');
             
-            $columns['date'] = __('Date', 'subscription_plan');
+            $columns['date'] = __('Date', 'accommodation');
             
             return $columns;
 
@@ -171,7 +173,10 @@
          public function output_column_content($column, $post_id){
              
             switch( $column ) {
-               
+               case 'accommodation_bed_type':
+                   $bed_type = get_post_meta($post_id, '_accommodation_bed_type', true);
+                    echo esc_html($bed_type);
+                   break;
                         
                     
                 default:

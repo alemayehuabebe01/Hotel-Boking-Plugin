@@ -155,27 +155,27 @@
             /**
              * to overide the default columns
             */
-                unset($columns['date']);
-                unset($columns['title']);
-                if (isset($columns['taxonomy-branch_location'])) {
-                    // remove the branch location column if it exists
-                    unset($columns['taxonomy-branch_location']);
+                // unset($columns['date']);
+                // unset($columns['title']);
+                // if (isset($columns['taxonomy-branch_location'])) {
+                //     // remove the branch location column if it exists
+                //     unset($columns['taxonomy-branch_location']);
 
-                    }
+                //     }
               
               
                 //unset($columns['subscription_price']);
             
-                $columns['post_id'] = __('ID', 'subscription_plan');     
-                $columns['title'] = __('Plan', 'subscription_plan');
-                $columns['subscription_price'] = __('Price', 'subscription_plan');
-                $columns['subscription_signup_fee'] = __('Sign Up Fee', 'subscription_plan');
-                $columns['subscription_free_trial'] = __('Free Trial', 'subscription_plan');
-                $columns['subscription_status'] = __('Status', 'subscription_plan');
+                // $columns['post_id'] = __('ID', 'subscription_plan');     
+                // $columns['title'] = __('Plan', 'subscription_plan');
+                // $columns['subscription_price'] = __('Price', 'subscription_plan');
+                // $columns['subscription_signup_fee'] = __('Sign Up Fee', 'subscription_plan');
+                // $columns['subscription_free_trial'] = __('Free Trial', 'subscription_plan');
+                // $columns['subscription_status'] = __('Status', 'subscription_plan');
                 
-                $columns['date'] = __('Date', 'subscription_plan');
+                // $columns['date'] = __('Date', 'subscription_plan');
                 
-                return $columns;
+                // return $columns;
 
 
         } 
@@ -186,13 +186,13 @@
 
          public function output_column_content($column, $post_id){
              
-            switch( $column ) {
+            // switch( $column ) {
                
                         
                     
-                default:
-                    break;
-            }
+            //     default:
+            //         break;
+            // }
 
         
          }

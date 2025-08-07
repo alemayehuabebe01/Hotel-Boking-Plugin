@@ -14,6 +14,12 @@
             add_action( 'manage_accommodation_posts_columns', array( $this, 'add_columns' ) );
             add_filter('manage_accommodation_posts_custom_column', array($this, 'output_column_content'),10,2 );
             add_action('admin_enqueue_scripts', array($this, 'enqueue_accommodation_cpt_admin_styles' ));
+            add_filter('post_row_actions', function($actions, $post) {
+                if ($post->post_type === 'accommodation') { // Change to your CPT slug
+                    $actions = ['post_id' => 'ID: ' . $post->ID] + $actions;
+                }
+                return $actions;
+            }, 10, 2);
             
          
             
@@ -115,27 +121,27 @@
             /**
              * to overide the default columns
              */
-              unset($columns['date']);
-              unset($columns['title']);
-              if (isset($columns['taxonomy-branch_location'])) {
-                // remove the branch location column if it exists
-                unset($columns['taxonomy-branch_location']);
+            //   unset($columns['date']);
+            //   unset($columns['title']);
+            //   if (isset($columns['taxonomy-branch_location'])) {
+            //     // remove the branch location column if it exists
+            //     unset($columns['taxonomy-branch_location']);
 
-                }
-              
-              
+            //     }
+                
+    
               //unset($columns['subscription_price']);
          
-            $columns['post_id'] = __('ID', 'subscription_plan');     
-            $columns['title'] = __('Plan', 'subscription_plan');
-            $columns['subscription_price'] = __('Price', 'subscription_plan');
-            $columns['subscription_signup_fee'] = __('Sign Up Fee', 'subscription_plan');
-            $columns['subscription_free_trial'] = __('Free Trial', 'subscription_plan');
-            $columns['subscription_status'] = __('Status', 'subscription_plan');
+                
+            // $columns['title'] = __('Plan', 'subscription_plan');
+            // $columns['subscription_price'] = __('Price', 'subscription_plan');
+            // $columns['subscription_signup_fee'] = __('Sign Up Fee', 'subscription_plan');
+            // $columns['subscription_free_trial'] = __('Free Trial', 'subscription_plan');
+            // $columns['subscription_status'] = __('Status', 'subscription_plan');
             
-            $columns['date'] = __('Date', 'subscription_plan');
+            // $columns['date'] = __('Date', 'subscription_plan');
             
-            return $columns;
+            // return $columns;
 
 
         } 
@@ -144,18 +150,17 @@
          * output Table column values
          */
 
-         public function output_column_content($column, $post_id){
+        //  public function output_column_content($column, $post_id){
              
-            switch( $column ) {
-               
-                        
-                    
-                default:
-                    break;
-            }
+        //     switch( $column ) {
+                 
+                
+        //         default:
+        //             break;
+        //     }
 
         
-         }
+        //  }
         
 
   

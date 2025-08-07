@@ -109,11 +109,11 @@
              }
 
              if (isset($_POST['accommodation_view'])) {
-                update_post_meta($post_id, '_accommodation_view', intval($_POST['accommodation_view']));
+                update_post_meta($post_id, '_accommodation_view', $_POST['accommodation_view']);
              }
 
              if (isset($_POST['accommodation_bed_type'])) {
-                update_post_meta($post_id, '_accommodation_bed_type', intval($_POST['accommodation_bed_type']));
+                update_post_meta($post_id, '_accommodation_bed_type', $_POST['accommodation_bed_type']);
              }
  
   
