@@ -72,6 +72,10 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/meta/class.nehabi-hotel-accommodation-capacity-metaboxe.php' );
             $Nehabi_Accommodation_Capacity_Metaboxes = New Nehabi_Accommodation_Capacity_Metaboxes();
 
+            //load the template files
+            add_filter('theme_page_templates',array($this, 'nehabi_homes_templates_register'),10,3);
+            add_filter('template_include',array($this, 'nehabi_homes_templates_load'),99);
+
 
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
            
@@ -101,6 +105,52 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             define ( 'Nehabi_Hotel_Booking_URL', plugin_dir_url( __FILE__ ) );
             define ( 'Nehabi_Hotel_Booking_VERSION', '1.0.0' );   
 
+        }
+
+        public function nehabi_hotel_templates_array(){
+            $temps = [];
+
+            $temps['nehabi_hotel_all_accommodation.php'] = 'All Accommodations';
+       
+            return $temps;
+        }
+
+        public function nehabi_homes_templates_register($page_template,$theme,$post){
+            
+          $templates = $this->nehabi_hotel_templates_array();
+          foreach($templates as $tk=> $tv){
+
+            $page_template[$tk] = $tv;
+
+          }
+
+          return $page_template;
+
+        }
+
+        public function nehabi_homes_templates_load($template) {
+
+            global $post, $wp_query, $wpdb;
+        
+            $nehabi_page_temp_slug = get_page_template_slug($post->ID);
+        
+            
+            if (!empty($nehabi_page_temp_slug) && isset($nehabi_page_temp_slug)) {
+                
+                $custom_template_path = Nehabi_Hotel_Booking_PATH . 'views/templates/' . $nehabi_page_temp_slug;
+        
+               
+                if (file_exists($custom_template_path)) {
+                     
+                    $template = $custom_template_path;
+                } else {
+                     
+                    error_log("Template not found: " . $custom_template_path);
+                }
+            }
+        
+             
+            return $template;
         }
 
         
