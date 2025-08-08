@@ -19,7 +19,7 @@
 
     /* Remove .room-grid grid styles, replaced by Swiper */
     .swiper {
-      max-width: 1400px;
+      
       margin: auto;
       padding-bottom: 40px; /* space for arrows */
     }

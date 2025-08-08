@@ -83,6 +83,9 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/shortcodes/class.nehabi-slide-rooms.php');
             $Nehabi_Hotel_Slide_Rooms_Shortcode = New Nehabi_Hotel_Slide_Rooms_Shortcode();
 
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/shortcodes/class.nehabi-hero-section.php');
+            $Nehabi_Hotel_Slide_Hero_Rooms_Shortcode = New Nehabi_Hotel_Slide_Hero_Rooms_Shortcode();
+
 
 
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
