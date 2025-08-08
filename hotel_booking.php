@@ -76,6 +76,14 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             add_filter('theme_page_templates',array($this, 'nehabi_homes_templates_register'),10,3);
             add_filter('template_include',array($this, 'nehabi_homes_templates_load'),99);
 
+            //load shortcodes class
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/shortcodes/class.nehabi-grid-rooms.php');
+            $Nehabi_Hotel_Grid_Rooms_Shortcode = New Nehabi_Hotel_Grid_Rooms_Shortcode();
+
+            require_once( Nehabi_Hotel_Booking_PATH . 'app/shortcodes/class.nehabi-slide-rooms.php');
+            $Nehabi_Hotel_Slide_Rooms_Shortcode = New Nehabi_Hotel_Slide_Rooms_Shortcode();
+
+
 
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
            
