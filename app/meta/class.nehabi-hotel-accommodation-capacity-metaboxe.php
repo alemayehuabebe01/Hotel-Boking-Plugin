@@ -35,6 +35,7 @@
             $adults = get_post_meta($post->ID, '_accommodation_adults', true) ?: 1;
             $children = get_post_meta($post->ID, '_accommodation_children', true) ?: 0;
             $capacity = get_post_meta($post->ID, '_accommodation_capacity', true) ?: '';
+            $accommodation_price = get_post_meta($post->ID, '_accommodation_price', true) ?: '';
             $base_adults = get_post_meta($post->ID, '_accommodation_base_adults', true) ?: '';
             $base_children = get_post_meta($post->ID, '_accommodation_base_children', true) ?: '';
             $bed_type = get_post_meta($post->ID, '_accommodation_bed_type', true);
@@ -43,6 +44,13 @@
 
             <table class="form-table">
                 <tbody>
+                     <tr>
+                        <th><label for="accommodation_capacity">Base Price</label></th>
+                        <td>
+                            <input type="number" id="accommodation_price" name="accommodation_price" value="<?php echo esc_attr($accommodation_price); ?>" min="0" step="1" class="small-text">
+                            <p class="description">Base Price for the accommodation per night. </p>
+                        </td>
+                    </tr>
                     <tr>
                         <th><label for="accommodation_adults">Adults</label></th>
                         <td>
@@ -133,6 +141,10 @@
              }
              if (isset($_POST['accommodation_bed_type'])) {
                 update_post_meta($post_id, '_accommodation_bed_type', $_POST['accommodation_bed_type']);
+             }
+
+             if (isset($_POST['accommodation_price'])) {
+                update_post_meta($post_id, '_accommodation_price', $_POST['accommodation_price']);
              }
  
   

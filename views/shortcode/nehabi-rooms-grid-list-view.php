@@ -203,7 +203,8 @@
                     $view = get_post_meta($accommodation_post->ID, '_accommodation_view', true) ? : 'N/A';
                     $bed_type = get_post_meta($accommodation_post->ID, '_accommodation_bed_type', true) ? : 'N/A';
                     $price = get_post_meta($accommodation_post->ID, '_accommodation_price', true) ? : 'N/A';
-
+                    $base_price = get_post_meta($accommodation_post->ID, '_season_prices', true) ? : '0';
+                    var_dump($base_price);
                 }
             }
 
@@ -239,6 +240,32 @@
                     <!-- <div class="price-line">
                         Prices start at: <strong class="price">$<?php echo esc_html($price); ?></strong> for <?php echo esc_html($nights); ?> nights (+taxes and fees)
                     </div> -->
+<?php
+                    
+
+              if ($base_price) :
+                
+              ?>
+              
+              <div class="price-line" style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  background: #f8f9fa;
+                  padding: 12px 16px;
+                  border-radius: 6px;
+                  border: 1px solid #dee2e6;
+                  margin: 15px 0;
+                  font-size: 16px;
+              ">
+                  <span>
+                      <strong>Price per night:</strong>
+                      <strong class="price" style="color: #28a745; font-size: 18px;">
+                          $<?php echo number_format((float)$base_price, 2); ?>
+                      </strong>
+                  </span>
+              </div>
+              <?php endif; ?>
                     <div class="room-buttons">
                         <a href="<?php echo esc_url('/book/' . $room_id); ?>" class="btn">BOOK</a>
                         <a href="<?php echo esc_url('/rooms/' . $room_id); ?>" class="details-link">View Details</a>
