@@ -157,118 +157,103 @@
 
 <div class="room-grid">
 
+
   <!-- Repeat this room-card 4x -->
-  <div class="room-card">
-    <div class="room-img-wrapper">
-       <img src="https://picsum.photos/id/1018/400/250" alt="Deluxe Suite">
-    </div>
-    <div class="room-info">
-      <h3>Villa Basilicata Grande</h3>
-      <p class="room-description">
-        This is a perfect villa with spa center and hot tub for private, family and corporate rest in Le Marche region in Italy, with best nature views.
-      </p>
-      <div class="room-meta-grid">
-        <div><i class="fas fa-users"></i> 8</div>
-        <div><i class="fas fa-ruler-combined"></i> 180m²</div>
-      </div>
-      <p class="room-amenities">
-        <strong>Amenities:</strong> Air conditioning, Beachfront, Dining area, <span class="highlight">Flat-screen TV</span>, Free parking, Free WiFi, Outdoor pool <br>
-        <strong>View:</strong> Beachfront, Outdoor pool <br>
-        <strong>Bed Type:</strong> 2 Queen beds, 3 Tween beds, 1 Sofa <br>
-        <strong>Categories:</strong> Le Marche
-      </p>
-      <div class="price-line">
-        Prices start at: <strong class="price">$655.20</strong> for 3 nights (+taxes and fees)
-      </div>
-      <div class="room-buttons">
-        <a href="#" class="btn">BOOK</a>
-        <a href="#" class="details-link">View Details</a>
-      </div>
-    </div>
-  </div>
+   <?php
+    $rooms_args = array(
+        'post_type'      => 'nh_rooms',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    );
 
-  <!-- Copy and paste this card block 3 more times below with different images or titles -->
-  <div class="room-card">
-    <div class="room-img-wrapper">
-       <img src="https://picsum.photos/id/1018/400/250" alt="Deluxe Suite">
-    </div>
-    <div class="room-info">
-      <h3>Villa Amalfi Sunlight</h3>
-      <p class="room-description">Relax in style on the Amalfi Coast with breathtaking ocean views, outdoor pools, and pure elegance.</p>
-      <div class="room-meta-grid">
-        <div><i class="fas fa-users"></i> 6</div>
-        <div><i class="fas fa-ruler-combined"></i> 150m²</div>
-      </div>
-      <p class="room-amenities">
-        <strong>Amenities:</strong> Sea view, Terrace, Espresso machine, <span class="highlight">Infinity Pool</span>, Free WiFi <br>
-        <strong>View:</strong> Oceanfront <br>
-        <strong>Bed Type:</strong> 2 King beds, 1 Sofa <br>
-        <strong>Categories:</strong> Amalfi
-      </p>
-      <div class="price-line">
-        Prices start at: <strong class="price">$780.00</strong> for 3 nights (+taxes and fees)
-      </div>
-      <div class="room-buttons">
-        <a href="#" class="btn">BOOK</a>
-        <a href="#" class="details-link">View Details</a>
-      </div>
-    </div>
-  </div>
+    $get_rooms = new WP_Query($rooms_args);
 
-  <div class="room-card">
-    <div class="room-img-wrapper">
-       <img src="https://picsum.photos/id/1018/400/250" alt="Deluxe Suite">
-    </div>
-    <div class="room-info">
-      <h3>Villa Toscana Retreat</h3>
-      <p class="room-description">Enjoy peace, vineyards, and rustic luxury in the heart of Tuscany. Private chef included!</p>
-      <div class="room-meta-grid">
-        <div><i class="fas fa-users"></i> 10</div>
-        <div><i class="fas fa-ruler-combined"></i> 250m²</div>
-      </div>
-      <p class="room-amenities">
-        <strong>Amenities:</strong> Vineyard view, Fire pit, Sauna, <span class="highlight">Chef Service</span>, Wine cellar <br>
-        <strong>View:</strong> Hills, Olive groves <br>
-        <strong>Bed Type:</strong> 4 King beds <br>
-        <strong>Categories:</strong> Tuscany
-      </p>
-      <div class="price-line">
-        Prices start at: <strong class="price">$1,200.00</strong> for 3 nights (+taxes and fees)
-      </div>
-      <div class="room-buttons">
-        <a href="#" class="btn">BOOK</a>
-        <a href="#" class="details-link">View Details</a>
-      </div>
-    </div>
-  </div>
+    if ( $get_rooms->have_posts() ) {
+        while ( $get_rooms->have_posts() ) {
+            $get_rooms->the_post();
 
-  <div class="room-card">
-    <div class="room-img-wrapper">
-       <img src="https://picsum.photos/id/1018/400/250" alt="Deluxe Suite">
-    </div>
-    <div class="room-info">
-      <h3>Villa Riviera Bliss</h3>
-      <p class="room-description">Chic modern villa with private beach access, rooftop terrace, and stunning sunset views.</p>
-      <div class="room-meta-grid">
-        <div><i class="fas fa-users"></i> 5</div>
-        <div><i class="fas fa-ruler-combined"></i> 120m²</div>
-         <div><i class="fas fa-user"></i> 5 </div>
-      </div>
-      <p class="room-amenities">
-        <strong>Amenities:</strong> Private beach, Rooftop bar, <span class="highlight">Smart Home</span>, WiFi, Air conditioning <br>
-        <strong>View:</strong> Riviera Coastline <br>
-        <strong>Bed Type:</strong> 2 Queen beds, 1 Sofa <br>
-        <strong>Categories:</strong> French Riviera
-      </p>
-      <div class="price-line">
-        Prices start at: <strong class="price">$499.99</strong> for 3 nights (+taxes and fees)
-      </div>
-      <div class="room-buttons">
-        <a href="#" class="btn">BOOK</a>
-        <a href="#" class="details-link">View Details</a>
-      </div>
-    </div>
-  </div>
+            $room_id = get_the_ID();
+            
+            // Get linked accommodation ID from room meta
+            $linked_accommodation_id = get_post_meta($room_id, '_selected_accommodation_type', true);
+
+            // Pull accommodation details
+            $accommodation_title = '';
+            $accommodation_image = '';
+            $accommodation_desc  = '';
+
+            if ( $linked_accommodation_id ) {
+                $accommodation_post = get_post($linked_accommodation_id);
+
+                if ( $accommodation_post && $accommodation_post->post_type === 'accommodation' && $accommodation_post->post_status === 'publish' ) {
+                    $accommodation_title = get_the_title($accommodation_post->ID);
+                    $accommodation_image = get_the_post_thumbnail_url($accommodation_post->ID, 'large');
+                    $accommodation_desc  = wp_trim_words($accommodation_post->post_content, 10, '...');
+                    $accommodation_cappacity = get_post_meta($accommodation_post->ID, '_accommodation_capacity',true) ? : 'N/A';
+                    $accommodation_size = get_post_meta($accommodation_post->ID, '_accommodation_size', true) ? : 'N/A';
+                    $accommodation_childern = get_post_meta($accommodation_post->ID,'_accommodation_children',true) ? : 'N/A';
+                    $accommodation_amenities = wp_get_post_terms(
+                        $accommodation_post->ID,
+                        'accommodation_amenity',
+                        array('fields' => 'names')
+                    );
+
+                    $view = get_post_meta($accommodation_post->ID, '_accommodation_view', true) ? : 'N/A';
+                    $bed_type = get_post_meta($accommodation_post->ID, '_accommodation_bed_type', true) ? : 'N/A';
+                    $price = get_post_meta($accommodation_post->ID, '_accommodation_price', true) ? : 'N/A';
+
+                }
+            }
+
+             
+            ?>
+
+            <div class="room-card">
+                <!-- <div class="room-img-wrapper">
+                    <img src="<?php echo esc_url($room_image ?: 'https://via.placeholder.com/400x250'); ?>" alt="<?php the_title_attribute(); ?>">
+                </div> -->
+                <div class="room-info">
+               <?php if ( $accommodation_title ) : ?> 
+                        <h3><?php echo esc_html($accommodation_title); ?></h3>
+                        <?php if ( $accommodation_image ) : ?>
+                            <img src="<?php echo esc_url($accommodation_image); ?>" alt="<?php echo esc_attr($accommodation_title); ?>" class="accommodation-img">
+                        <?php endif; ?>
+                        <?php if ( $accommodation_desc ) : ?>
+                            <p class="accommodation-description"><?php echo esc_html($accommodation_desc); ?></p>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <!-- <p class="room-description"><?php the_content(); ?></p> -->
+                    <div class="room-meta-grid">
+                        <div><i class="fas fa-users"></i> <?php echo esc_html($accommodation_cappacity); ?></div>
+                         <div><i class="fas fa-user"></i> <?php echo esc_html($accommodation_childern); ?></div>
+                        <div><i class="fas fa-ruler-combined"></i> <?php echo esc_html($accommodation_size).' m²'; ?></div>
+                    </div>
+                    <p class="room-amenities">
+                        <strong>Amenities:</strong> <?php echo esc_html( implode(', ', $accommodation_amenities) ); ?><br>
+                        <strong>View:</strong> <?php echo esc_html($view); ?><br>
+                        <strong>Bed Type:</strong> <?php echo esc_html($bed_type); ?>
+                    </p>
+                    <!-- <div class="price-line">
+                        Prices start at: <strong class="price">$<?php echo esc_html($price); ?></strong> for <?php echo esc_html($nights); ?> nights (+taxes and fees)
+                    </div> -->
+                    <div class="room-buttons">
+                        <a href="<?php echo esc_url('/book/' . $room_id); ?>" class="btn">BOOK</a>
+                        <a href="<?php echo esc_url('/rooms/' . $room_id); ?>" class="details-link">View Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <?php
+        }
+        wp_reset_postdata();
+}
+?>
+   
+
+   
 
 </div>
 
