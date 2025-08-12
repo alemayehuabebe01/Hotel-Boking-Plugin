@@ -65,7 +65,7 @@
                 <input type="text"
                     id="accommodation_view"
                     name="accommodation_view"
-                    value="<?php echo esc_url($view); ?>"
+                    value="<?php echo esc_html($view); ?>"
                     style="width: 500px; padding: 4px 8px; font-size: 14px; border: 1px solid #ccd0d4; border-radius: 4px;"
                     >
                     
