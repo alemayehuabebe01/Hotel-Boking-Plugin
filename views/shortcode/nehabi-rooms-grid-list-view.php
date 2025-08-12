@@ -187,7 +187,8 @@
             if ( $linked_accommodation_id ) {
                 $accommodation_post = get_post($linked_accommodation_id);
 
-                if ( $accommodation_post && $accommodation_post->post_type === 'accommodation' && $accommodation_post->post_status === 'publish' ) {
+                if ( $accommodation_post && $accommodation_post->post_type === 'accommodation' && $accommodation_post->post_status === 'publish' )
+                   {
                     $accommodation_title = get_the_title($accommodation_post->ID);
                     $accommodation_image = get_the_post_thumbnail_url($accommodation_post->ID, 'large');
                     $accommodation_desc  = wp_trim_words($accommodation_post->post_content, 10, '...');
@@ -240,10 +241,10 @@
                         Prices start at: <strong class="price">$<?php echo esc_html($price); ?></strong> for 1 nights (+taxes and fees)
                     </div>
  
-                    <div class="room-buttons">
-                        <a href="<?php echo esc_url('/book/' . $room_id); ?>" class="btn">BOOK</a>
-                        <a href="<?php echo esc_url('/rooms/' . $room_id); ?>" class="details-link">View Details</a>
-                    </div>
+                   <div class="room-buttons">
+                      <a href="<?php echo get_permalink($linked_accommodation_id); ?>" class="btn">BOOK</a>
+                      <a href="<?php echo get_permalink($linked_accommodation_id); ?>" class="details-link">View Details</a>
+                  </div>
                 </div>
             </div>
 

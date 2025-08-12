@@ -95,6 +95,8 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/shortcodes/class.nehabi-hero-section.php');
             $Nehabi_Hotel_Slide_Hero_Rooms_Shortcode = New Nehabi_Hotel_Slide_Hero_Rooms_Shortcode();
 
+            add_filter( 'single_template', array( $this, 'load_custom_nehabi_single_template' ) );
+            add_filter( 'single_template', array( $this, 'load_custom_nehabi_room_single_template' ) );
 
 
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
@@ -105,8 +107,8 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
         // Register Scripts and Styles
         public function register_scripts(){
            
-            wp_register_script( 'bootstrap-js', Nehabi_Hotel_Booking_URL. 'inc/bootstrap.min.js', array('jquery'), '4.3.1', true );
-            wp_register_style( 'bootstrap-css', Nehabi_Hotel_Booking_URL. 'inc/bootstrap.min.css', array(), '4.3.1', 'all' );
+            // wp_register_script( 'bootstrap-js', Nehabi_Hotel_Booking_URL. 'inc/bootstrap.min.js', array('jquery'), '4.3.1', true );
+            // wp_register_style( 'bootstrap-css', Nehabi_Hotel_Booking_URL. 'inc/bootstrap.min.css', array(), '4.3.1', 'all' );
             wp_register_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
             wp_register_style('datatables-css', 'https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css');
             wp_register_script('datatables-js', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
@@ -173,7 +175,23 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             return $template;
         }
 
+        public function load_custom_nehabi_single_template( $tpl ){  
+                 
+                if( is_singular('accommodation') ){
+
+                $tpl = Nehabi_Hotel_Booking_PATH. 'views/templates/single-accommodation.php';   
+                }   
+                return $tpl;
+        }
         
+         public function load_custom_nehabi_room_single_template( $tpl ){  
+                 
+                if( is_singular('nh_rooms') ){
+
+                $tpl = Nehabi_Hotel_Booking_PATH. 'views/templates/single-nh_rooms.php';   
+                }   
+                return $tpl;
+        }
 
  
         //Activate hook to register the custom post type.
