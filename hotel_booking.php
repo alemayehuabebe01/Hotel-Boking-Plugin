@@ -81,6 +81,9 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/meta/class.nehabi-hotel-accommodation-capacity-metaboxe.php' );
             $Nehabi_Accommodation_Capacity_Metaboxes = New Nehabi_Accommodation_Capacity_Metaboxes();
 
+            require_once( Nehabi_Hotel_Booking_PATH . 'inc/class.accommodation-booking-process.php' );
+            $Nehabi_Hotel_Accommodation_Booking_Proccess = New Nehabi_Hotel_Accommodation_Booking_Proccess();
+
             //load the template files
             add_filter('theme_page_templates',array($this, 'nehabi_homes_templates_register'),10,3);
             add_filter('template_include',array($this, 'nehabi_homes_templates_load'),99);
@@ -97,6 +100,8 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
 
             add_filter( 'single_template', array( $this, 'load_custom_nehabi_single_template' ) );
             add_filter( 'single_template', array( $this, 'load_custom_nehabi_room_single_template' ) );
+
+
 
 
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);

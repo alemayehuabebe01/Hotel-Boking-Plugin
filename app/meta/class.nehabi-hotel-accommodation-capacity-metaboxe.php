@@ -39,6 +39,8 @@
             $base_adults = get_post_meta($post->ID, '_accommodation_base_adults', true) ?: '';
             $base_children = get_post_meta($post->ID, '_accommodation_base_children', true) ?: '';
             $bed_type = get_post_meta($post->ID, '_accommodation_bed_type', true);
+            $accommodation_status = get_post_meta($post->ID, '_room_status', true);
+
 
             ?>
 
@@ -51,6 +53,22 @@
                             <p class="description">Base Price for the accommodation per night. </p>
                         </td>
                     </tr>
+
+                    <tr>
+
+                    <th>
+                        <label for="accommodation_status">Room Status</label>
+                    </th>
+                    <td>
+                        <select id="accommodation_status" name="accommodation_status">
+                            <option value="available" <?php selected($accommodation_status, 'available'); ?>>Available</option>
+                            <option value="booked" <?php selected($accommodation_status, 'booked'); ?>>Booked</option>
+                            <option value="unavailable" <?php selected($accommodation_status, 'unavailable'); ?>>Unavailable</option>
+                        </select>
+                        <p class="description">Set the current booking status of the accommodation.</p>
+                    </td>
+                </tr>
+
                     <tr>
                         <th><label for="accommodation_adults">Adults</label></th>
                         <td>
@@ -119,7 +137,9 @@
 
              if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
             
-             
+             if (isset($_POST['accommodation_status'])) {
+                update_post_meta($post_id, '_room_status', sanitize_text_field($_POST['accommodation_status']));
+            }
 
              if (isset($_POST['accommodation_adults'])) {
                 update_post_meta($post_id, '_accommodation_adults', intval($_POST['accommodation_adults']));
@@ -192,7 +212,7 @@
             $columns['taxonomy-accommodation_amenity'] = __('Amenities', 'accommodation');
             $columns['accommodation_bed_type'] = __('Bed Type', 'accommodation');
             $columns['accommodation_children'] = __('Capacity', 'accommodation');
-            
+            $columns['accommodation_count'] = __('Availablity', 'accommodation');
             
             $columns['date'] = __('Date', 'accommodation');
             
@@ -221,6 +241,19 @@
                     $bed_type = get_post_meta($post_id, '_accommodation_bed_type', true);
                     echo esc_html($bed_type);
                    break; 
+                case 'accommodation_count':
+                    $count = get_post_meta($post_id, '_accommodation_count', true);
+                    $room_status = get_post_meta($post_id, '_room_status', true);
+                    if ($room_status === 'booked') {
+                        echo '<span style="color: red;">Booked</span>';
+                    } elseif ($room_status === 'unavailable') {
+                        echo '<span style="color: orange;">Unavailable</span>';
+                    }
+                    else {
+                        echo '<span style="color: green;">' . esc_html($count) . ' Available</span>';
+                    }
+
+                    break;
                         
                         
                     

@@ -238,7 +238,7 @@
                         <strong>Bed Type:</strong> <?php echo esc_html($bed_type); ?>
                     </p>
                     <div class="price-line">
-                        Prices start at: <strong class="price">$<?php echo esc_html($price); ?></strong> for 1 nights (+taxes and fees)
+                        Prices start at: <strong class="price">$<?php echo esc_html($price); ?></strong> for 1 nights.
                     </div>
  
                    <div class="room-buttons">

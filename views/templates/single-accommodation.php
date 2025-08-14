@@ -42,33 +42,42 @@ get_header();
                                 <span class="text-muted">5.0 (24 reviews)</span>
                             </div>
                         </div>
-                        <span class="badge bg-primary bg-opacity-10 text-primary fs-6">
-                            <?php echo esc_html(get_post_meta(get_the_ID(), 'accommodation_type', true)); ?>
-                        </span>
+                         
                     </div>
                     
                     <div class="mb-4">
                         <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-geo-alt-fill text-primary me-2"></i>
-                            <span><?php echo esc_html(get_post_meta(get_the_ID(), 'location', true)); ?></span>
-                        </div>
+                        <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                        <span>
+                            <?php
+                            // Get the terms for the 'accommodation_category' taxonomy
+                            $terms = get_the_terms(get_the_ID(), 'accommodation_category');
+                            if ($terms && !is_wp_error($terms)) {
+                                // Just output the first term name (or loop if multiple)
+                                echo esc_html($terms[0]->name);
+                            } else {
+                                echo 'No category assigned';
+                            }
+                            ?>
+                        </span>
+                    </div>
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-people-fill text-primary me-2"></i>
-                            <span>Max <?php echo esc_html(get_post_meta(get_the_ID(), 'max_guests', true)); ?> guests</span>
+                            <span>Max <?php echo esc_html(get_post_meta(get_the_ID(), '_accommodation_capacity', true)); ?> guests</span>
                         </div>
                         <div class="d-flex align-items-center">
                             <i class="bi bi-layout-wtf text-primary me-2"></i>
-                            <span><?php echo esc_html(get_post_meta(get_the_ID(), 'room_size', true)); ?> sqm</span>
+                            <span><?php echo esc_html(get_post_meta(get_the_ID(), '_accommodation_size', true)); ?> sqm</span>
                         </div>
                     </div>
                     
                     <div class="bg-white p-4 rounded-3 shadow-sm mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h4 class="mb-0">Price</h4>
-                            <h3 class="text-primary fw-bold mb-0">
-                                <?php echo esc_html(get_post_meta(get_the_ID(), 'price', true)); ?> ETB 
+                            <h5 class="text-primary fw-bold mb-0">
+                                <?php echo esc_html(get_post_meta(get_the_ID(), '_accommodation_price', true)); ?> ETB 
                                 <small class="text-muted fs-6 fw-light">/ night</small>
-                            </h3>
+                            </h5>
                         </div>
                         <a href="#booking-form" class="btn btn-primary w-100 py-3 fw-bold">
                             <i class="bi bi-calendar-check me-2"></i> Book Now
@@ -215,85 +224,175 @@ get_header();
                         </div>
                     </div>
                 </div>
+
+              
                 
                 <!-- Right Sidebar - Booking Form -->
-                <div class="col-lg-4">
+               <div class="col-lg-4">
+
+               <!-- check the availablity of the room -->
+
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h3 class="mb-4 text-center">Check Availability</h3>
+
+                    <form id="availability-check-form">
+                        <input type="hidden" name="action" value="check_accommodation_availability">
+                        <input type="hidden" name="accommodation_id" value="<?php echo esc_attr(get_the_ID()); ?>">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Check-in</label>
+                            <input type="date" name="checkin" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Check-out</label>
+                            <input type="date" name="checkout" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search"></i> Check Availability
+                        </button>
+                    </form>
+
+                    <div id="availability-result" class="mt-3"></div>
+                </div>
+            </div>
+
+
+
+
+
+
+
                     <div id="booking-form" class="card border-0 shadow-sm sticky-top" style="top: 20px;">
                         <div class="card-body p-4">
                             <h3 class="mb-4 text-center">Reserve Your Stay</h3>
-                            
-                            <form method="post" action="">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Check-in</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white"><i class="bi bi-calendar"></i></span>
-                                        <input type="date" name="checkin" class="form-control" required>
+
+                            <?php
+                            $accommodation_id = get_the_ID();
+                            $price_per_night  = (float) get_post_meta($accommodation_id, '_accommodation_price', true);
+                            $rooms_left       = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
+                            $room_status      = strtolower((string) get_post_meta($accommodation_id, '_room_status', true));
+                            $available        = ($rooms_left > 0 && $room_status !== 'booked');
+
+                            $today    = date('Y-m-d');
+                            $tomorrow = date('Y-m-d', strtotime('+1 day'));
+                            ?>
+
+                            <?php if ($available): ?>
+                                <form method="post" action="">
+                                    <?php wp_nonce_field('wishu_booking_nonce', 'wishu_booking_nonce_field'); ?>
+                                    <input type="hidden" name="accommodation_id" value="<?php echo esc_attr($accommodation_id); ?>">
+                                    <input type="hidden" name="start_booking" value="1">
+                                    <input type="hidden" id="price_per_night" value="<?php echo esc_attr($price_per_night); ?>">
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Check-in</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-calendar"></i></span>
+                                            <input type="date" name="checkin" id="checkin" class="form-control" min="<?php echo esc_attr($today); ?>" required>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Check-out</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white"><i class="bi bi-calendar"></i></span>
-                                        <input type="date" name="checkout" class="form-control" required>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Check-out</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-calendar"></i></span>
+                                            <input type="date" name="checkout" id="checkout" class="form-control" min="<?php echo esc_attr($tomorrow); ?>" required>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Guests</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white"><i class="bi bi-people"></i></span>
-                                        <select name="guests" class="form-select" required>
-                                            <option value="1">1 Guest</option>
-                                            <option value="2">2 Guests</option>
-                                            <option value="3">3 Guests</option>
-                                            <option value="4">4 Guests</option>
-                                        </select>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Guests</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-people"></i></span>
+                                            <select name="guests" class="form-select" required>
+                                                <option value="1">1 Guest</option>
+                                                <option value="2">2 Guests</option>
+                                                <option value="3">3 Guests</option>
+                                                <option value="4">4 Guests</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Full Name</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-                                        <input type="text" name="fullname" class="form-control" required>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Full Name</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+                                            <input type="text" name="fullname" class="form-control" required>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Email</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
-                                        <input type="email" name="email" class="form-control" required>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Email</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+                                            <input type="email" name="email" class="form-control" required>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold">Phone</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
-                                        <input type="tel" name="phone" class="form-control">
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold">Phone</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
+                                            <input type="tel" name="phone" class="form-control">
+                                        </div>
                                     </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold">Special Requests</label>
+                                        <textarea name="requests" rows="3" class="form-control" placeholder="Any special requirements..."></textarea>
+                                    </div>
+
+                                    <!-- Total Price Display -->
+                                    <div class="mb-4">
+                                        <h5>Total: <span id="total_price">0</span> ETB</h5>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
+                                        Confirm Booking
+                                    </button>
+                                </form>
+
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-shield-lock me-1"></i> Your information is secure
+                                    </small>
                                 </div>
-                                
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold">Special Requests</label>
-                                    <textarea name="requests" rows="3" class="form-control" placeholder="Any special requirements..."></textarea>
+
+                                <!-- JS for instant total price calculation -->
+                                <script>
+                                    const checkin = document.getElementById('checkin');
+                                    const checkout = document.getElementById('checkout');
+                                    const totalPriceEl = document.getElementById('total_price');
+                                    const pricePerNight = parseFloat(document.getElementById('price_per_night').value);
+
+                                    function calculateTotal() {
+                                        const start = new Date(checkin.value);
+                                        const end = new Date(checkout.value);
+                                        if (start && end && end > start) {
+                                            const timeDiff = end - start;
+                                            const nights = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                                            totalPriceEl.textContent = (nights * pricePerNight).toLocaleString();
+                                        } else {
+                                            totalPriceEl.textContent = 0;
+                                        }
+                                    }
+
+                                    checkin.addEventListener('change', calculateTotal);
+                                    checkout.addEventListener('change', calculateTotal);
+                                </script>
+                            <?php else: ?>
+                                <div class="alert alert-warning text-center">
+                                    This accommodation is currently unavailable.
                                 </div>
-                                
-                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
-                                    Confirm Booking
-                                </button>
-                            </form>
-                            
-                            <div class="text-center mt-3">
-                                <small class="text-muted">
-                                    <i class="bi bi-shield-lock me-1"></i> Your information is secure
-                                </small>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
+
+
             </div>
         </div>
         
@@ -359,5 +458,30 @@ get_header();
     <?php endwhile; ?>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById('availability-check-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const resultDiv = document.getElementById('availability-result');
+    resultDiv.innerHTML = '<div class="text-center text-muted">Checking...</div>';
+
+    fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.available) {
+            resultDiv.innerHTML = '<div class="alert alert-success">Available! You can proceed to book.</div>';
+        } else {
+            resultDiv.innerHTML = '<div class="alert alert-danger">Sorry, these dates are unavailable.</div>';
+        }
+    })
+    .catch(err => {
+        resultDiv.innerHTML = '<div class="alert alert-warning">Error checking availability. Please try again.</div>';
+    });
+});
+</script>
 
 <?php get_footer(); ?>
