@@ -4,8 +4,19 @@ if (!class_exists('Nehabi_Hotel_CPT')) {
     class Nehabi_Hotel_CPT {
 
         public function __construct() {
-            add_action('init', array($this, 'register_booking_cpt'));   
+            add_action('init', array($this, 'register_booking_cpt'));  
+            add_filter( 'manage_nehabi-hotel-booking_posts_columns', array($this,'wishu_booking_custom_columns') );
+            add_action( 'manage_nehabi-hotel-booking_posts_custom_column',array($this,'wishu_booking_custom_column_content') , 10, 2 );
+            add_filter( 'manage_edit-nehabi-hotel-booking_sortable_columns',array($this,'order_the_table'));
+
+
         }
+
+        public function order_the_table( $columns ){
+                    $columns['check_dates'] = 'checkin';
+                    $columns['price']       = 'price';
+                    return $columns;
+                }
 
         public function register_booking_cpt() {
             register_post_type(
@@ -55,6 +66,65 @@ if (!class_exists('Nehabi_Hotel_CPT')) {
                     'menu_icon' => 'dashicons-calendar-alt',
                 )
             );
+        }
+
+
+       public function wishu_booking_custom_columns( $columns ) {
+            unset( $columns['date'] ); // Optional: remove default date column
+            $columns['status']       = 'Status';
+            $columns['check_dates']  = 'Check-in / Check-out';
+            // $columns['guests']       = 'Guests';
+            $columns['customer_info']= 'Customer Info';
+            $columns['price']        = 'Price';
+            $columns['accommodation']= 'Accommodation';
+            $columns['date']         = 'Date'; // Keep Date at the end
+            return $columns;
+        }
+
+
+        public function wishu_booking_custom_column_content( $column, $post_id ) {
+            $order_id = get_post_meta( $post_id, 'order_id', true );
+            if ( ! $order_id ) return;
+
+            $order = wc_get_order( $order_id );
+            if ( ! $order ) return;
+
+            switch( $column ) {
+                case 'status':
+                    echo wc_get_order_status_name( $order->get_status() );
+                    break;
+
+                case 'check_dates':
+                    $check_in  = $order->get_meta( 'checkin' );  // from order meta
+                    $check_out = $order->get_meta( 'checkout' ); // from order meta
+                    echo $check_in && $check_out ? esc_html( $check_in . ' / ' . $check_out ) : '-';
+                    break;
+
+                case 'customer_info':
+                    echo esc_html( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
+                    echo '<br>' . esc_html( $order->get_billing_email() );
+                    break;
+
+                case 'price':
+                    echo wc_price( $order->get_total() );
+                    break;
+
+                case 'accommodation':
+                    $acc_id = $order->get_meta( 'accommodation_id' ); // from order meta
+                    if ( $acc_id ) {
+                        $acc_post = get_post( $acc_id );
+                        echo $acc_post ? esc_html( $acc_post->post_title ) : esc_html( $acc_id );
+                    } else {
+                        echo '-';
+                    }
+                    break;
+
+                // Optional guests column if needed
+                // case 'guests':
+                //     $guests = $order->get_meta( 'guests' );
+                //     echo $guests ? esc_html( $guests ) : '-';
+                //     break;
+            }
         }
     }
 }

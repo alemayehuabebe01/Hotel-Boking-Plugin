@@ -265,7 +265,7 @@ get_header();
 
 
 
-                    <div id="booking-form" class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                   <div id="booking-form" class="card border-0 shadow-sm sticky-top" style="top: 20px;">
                         <div class="card-body p-4">
                             <h3 class="mb-4 text-center">Reserve Your Stay</h3>
 
@@ -281,6 +281,19 @@ get_header();
                             ?>
 
                             <?php if ($available): ?>
+                                <!-- Remaining rooms badge -->
+                                <div class="mb-3 text-center">
+                                    <?php if ($rooms_left <= 2): ?>
+                                        <span class="badge bg-danger fw-bold">
+                                            Hurry! Only <?php echo esc_html($rooms_left); ?> room<?php echo $rooms_left > 1 ? 's' : ''; ?> left
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success fw-bold">
+                                            <?php echo esc_html($rooms_left); ?> room<?php echo $rooms_left > 1 ? 's' : ''; ?> available
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
                                 <form method="POST" action="">
                                     <?php wp_nonce_field('wishu_booking_nonce', 'wishu_booking_nonce_field'); ?>
                                     <input type="hidden" name="accommodation_id" value="<?php echo esc_attr($accommodation_id); ?>">
@@ -302,19 +315,6 @@ get_header();
                                             <input type="date" name="checkout" id="checkout" class="form-control" min="<?php echo esc_attr($tomorrow); ?>" required>
                                         </div>
                                     </div>
-
-                                    <!-- <div class="mb-3">
-                                        <label class="form-label fw-semibold">Guests</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white"><i class="bi bi-people"></i></span>
-                                            <select name="guests" class="form-select" required>
-                                                <option value="1">1 Guest</option>
-                                                <option value="2">2 Guests</option>
-                                                <option value="3">3 Guests</option>
-                                                <option value="4">4 Guests</option>
-                                            </select>
-                                        </div>
-                                    </div> -->
 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Full Name</label>
@@ -383,6 +383,7 @@ get_header();
                                     checkin.addEventListener('change', calculateTotal);
                                     checkout.addEventListener('change', calculateTotal);
                                 </script>
+
                             <?php else: ?>
                                 <div class="alert alert-warning text-center">
                                     This accommodation is currently unavailable.
@@ -390,7 +391,6 @@ get_header();
                             <?php endif; ?>
                         </div>
                     </div>
-                </div>
 
 
             </div>

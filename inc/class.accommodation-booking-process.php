@@ -17,6 +17,55 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
 
         // Ensure booking product exists
         add_action('init', [$this, 'ensure_booking_product']);
+        add_action( 'woocommerce_order_status_completed',[$this,'wishu_save_booking_to_cpt'] , 10, 1 );
+        add_action( 'woocommerce_checkout_update_order_meta',[$this,'wishu_save_custom_checkout_fields_to_order'] );
+
+
+    }
+
+       public  function wishu_save_custom_checkout_fields_to_order( $order_id ) {
+
+            // Accommodation ID
+            if ( isset( $_POST['accommodation_id'] ) && ! empty( $_POST['accommodation_id'] ) ) {
+                update_post_meta( $order_id, 'accommodation_id', sanitize_text_field( $_POST['accommodation_id'] ) );
+            }
+
+            // Check-in date
+            if ( isset( $_POST['checkin'] ) && ! empty( $_POST['checkin'] ) ) {
+                update_post_meta( $order_id, 'checkin', sanitize_text_field( $_POST['checkin'] ) );
+            }
+
+            // Check-out date
+            if ( isset( $_POST['checkout'] ) && ! empty( $_POST['checkout'] ) ) {
+                update_post_meta( $order_id, 'checkout', sanitize_text_field( $_POST['checkout'] ) );
+            }
+
+            
+        }
+
+    public function wishu_save_booking_to_cpt( $order_id ) {
+        $order = wc_get_order( $order_id );
+        if ( ! $order ) return;
+
+        // Get meta
+        $accommodation_id = $order->get_meta( 'accommodation_id' );
+        $check_in         = $order->get_meta( 'checkin' );
+        $check_out        = $order->get_meta( 'checkout' );
+        $customer_name    = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+
+        // Create CPT post
+        $booking_id = wp_insert_post( array(
+            'post_type'   => 'nehabi-hotel-booking',
+            'post_title'  => "Booking #{$order_id} - {$customer_name}",
+            'post_status' => 'publish',
+        ) );
+
+        if ( $booking_id ) {
+            update_post_meta( $booking_id, 'accommodation_id', $accommodation_id );
+            update_post_meta( $booking_id, 'checkin', $check_in );
+            update_post_meta( $booking_id, 'checkout', $check_out );
+            update_post_meta( $booking_id, 'order_id', $order_id );
+        }
     }
 
     /**
