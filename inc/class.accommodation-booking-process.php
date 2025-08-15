@@ -55,6 +55,10 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
             $checkin  = sanitize_text_field($_POST['checkin']);
             $checkout = sanitize_text_field($_POST['checkout']);
 
+            WC()->session->set( 'checkin', sanitize_text_field( $_POST['checkin'] ) );
+            WC()->session->set( 'checkout', sanitize_text_field( $_POST['checkout'] ) );
+            WC()->session->set( 'accommodation_id', intval( $_POST['accommodation_id'] ) );
+
             // 1️⃣ Check availability
             $available_rooms = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
             $room_status     = get_post_meta($accommodation_id, '_room_status', true);

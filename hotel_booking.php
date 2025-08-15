@@ -100,15 +100,59 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
 
             add_filter( 'single_template', array( $this, 'load_custom_nehabi_single_template' ) );
             add_filter( 'single_template', array( $this, 'load_custom_nehabi_room_single_template' ) );
-
-
-
-
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
-           
+            add_filter( 'woocommerce_checkout_fields' , array($this,'wishu_add_booking_fields') );
+            add_filter( 'woocommerce_checkout_fields', array($this,'wishu_remove_default_checkout_fields'), 20, 1 );
 
+          
         }
 
+
+        /**
+         * Remove default WooCommerce checkout fields
+         */
+        public  function wishu_remove_default_checkout_fields( $fields ) {
+
+            // Remove billing fields you don’t want
+            unset( $fields['billing']['billing_company'] );
+            unset( $fields['billing']['billing_address_1'] );
+            unset( $fields['billing']['billing_postcode'] );
+            unset( $fields['billing']['billing_state'] );
+            // OPTIONAL: also remove shipping fields if you're not shipping anything
+            unset( $fields['shipping'] );
+
+            return $fields;
+        }
+
+
+        public function wishu_add_booking_fields( $fields ) {
+                $accommodation_id = WC()->session->get( 'accommodation_id' );
+                $check_in         = WC()->session->get( 'checkin' );
+                $check_out        = WC()->session->get( 'checkout' );
+
+                $fields['billing']['accommodation_id'] = array(
+                    'type'     => 'number',
+                    'label'    => 'Accommodation ID',
+                    'required' => true,
+                    'default'  => $accommodation_id
+                );
+
+                $fields['billing']['checkin'] = array(
+                    'type'     => 'text',
+                    'label'    => 'Check-in Date',
+                    'required' => true,
+                    'default'  => $check_in
+                );
+
+                $fields['billing']['checkout'] = array(
+                    'type'    => 'text',
+                    'label'    => 'Check-out Date',
+                    'required' => true,
+                    'default'  => $check_out
+                );
+
+                return $fields;
+            }
         // Register Scripts and Styles
         public function register_scripts(){
            

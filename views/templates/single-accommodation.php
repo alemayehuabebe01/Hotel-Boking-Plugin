@@ -281,7 +281,7 @@ get_header();
                             ?>
 
                             <?php if ($available): ?>
-                                <form method="post" action="">
+                                <form method="POST" action="">
                                     <?php wp_nonce_field('wishu_booking_nonce', 'wishu_booking_nonce_field'); ?>
                                     <input type="hidden" name="accommodation_id" value="<?php echo esc_attr($accommodation_id); ?>">
                                     <input type="hidden" name="start_booking" value="1">
@@ -303,7 +303,7 @@ get_header();
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
+                                    <!-- <div class="mb-3">
                                         <label class="form-label fw-semibold">Guests</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-white"><i class="bi bi-people"></i></span>
@@ -314,7 +314,7 @@ get_header();
                                                 <option value="4">4 Guests</option>
                                             </select>
                                         </div>
-                                    </div>
+                                    </div> -->
 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Full Name</label>
@@ -458,30 +458,4 @@ get_header();
     <?php endwhile; ?>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.getElementById('availability-check-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const resultDiv = document.getElementById('availability-result');
-    resultDiv.innerHTML = '<div class="text-center text-muted">Checking...</div>';
-
-    fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.available) {
-            resultDiv.innerHTML = '<div class="alert alert-success">Available! You can proceed to book.</div>';
-        } else {
-            resultDiv.innerHTML = '<div class="alert alert-danger">Sorry, these dates are unavailable.</div>';
-        }
-    })
-    .catch(err => {
-        resultDiv.innerHTML = '<div class="alert alert-warning">Error checking availability. Please try again.</div>';
-    });
-});
-</script>
-
 <?php get_footer(); ?>
