@@ -32,7 +32,7 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
 
         // Create new hidden virtual product
         $product = new WC_Product();
-        $product->set_name('Hidden Booking Product');
+        $product->set_name('Accommodation Booking');
         $product->set_status('publish');
         $product->set_catalog_visibility('hidden');
         $product->set_price(0);

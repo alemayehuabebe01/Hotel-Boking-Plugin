@@ -103,6 +103,8 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ), 999);
             add_filter( 'woocommerce_checkout_fields' , array($this,'wishu_add_booking_fields') );
             add_filter( 'woocommerce_checkout_fields', array($this,'wishu_remove_default_checkout_fields'), 20, 1 );
+            add_action( 'woocommerce_checkout_update_order_meta', array($this,'wishu_save_custom_checkout_fields_to_order') );
+
 
           
         }
@@ -151,19 +153,37 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
                     'default'  => $check_out
                 );
 
+            
                 return $fields;
             }
+
+
+            /**
+             * Save custom checkout fields to order meta
+             */
+            public function wishu_save_custom_checkout_fields_to_order( $order_id ) {
+                if ( isset( $_POST['accommodation_id'] ) ) {
+                    update_post_meta( $order_id, 'accommodation_id', sanitize_text_field( $_POST['accommodation_id'] ) );
+                }
+                if ( isset( $_POST['checkin'] ) ) {
+                    update_post_meta( $order_id, 'check_in', sanitize_text_field( $_POST['check_in'] ) );
+                }
+                if ( isset( $_POST['checkout'] ) ) {
+                    update_post_meta( $order_id, 'check_out', sanitize_text_field( $_POST['check_out'] ) );
+                }
+            }
+
+
         // Register Scripts and Styles
         public function register_scripts(){
-           
-            // wp_register_script( 'bootstrap-js', Nehabi_Hotel_Booking_URL. 'inc/bootstrap.min.js', array('jquery'), '4.3.1', true );
-            // wp_register_style( 'bootstrap-css', Nehabi_Hotel_Booking_URL. 'inc/bootstrap.min.css', array(), '4.3.1', 'all' );
+         
             wp_register_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
             wp_register_style('datatables-css', 'https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css');
             wp_register_script('datatables-js', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
             wp_register_script( 'jszip', 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js', array('jquery'), null, true );
             wp_register_script( 'pdfmake', 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js', array('jquery'), null, true );
             wp_register_script( 'vfs_fonts', 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js', array('jquery'), null, true );
+
         }
 
        
