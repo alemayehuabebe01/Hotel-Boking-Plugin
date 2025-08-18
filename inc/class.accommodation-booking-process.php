@@ -19,8 +19,6 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
         add_action('init', [$this, 'ensure_booking_product']);
         add_action( 'woocommerce_checkout_order_processed',[$this,'wishu_save_booking_to_cpt'] , 10, 1 );
   
-
-
     }
 
         

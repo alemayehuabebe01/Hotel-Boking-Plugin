@@ -8,8 +8,24 @@ if (!class_exists('Nehabi_Hotel_CPT')) {
             add_filter( 'manage_nehabi-hotel-booking_posts_columns', array($this,'wishu_booking_custom_columns') );
             add_action( 'manage_nehabi-hotel-booking_posts_custom_column',array($this,'wishu_booking_custom_column_content') , 10, 2 );
             add_filter( 'manage_edit-nehabi-hotel-booking_sortable_columns',array($this,'order_the_table'));
+            add_action('admin_menu', array($this,'hb_remove_add_new_submenu'), 999);
+            add_action('admin_head', array($this,'hb_hide_add_new_button'));
+            add_action( 'wp_ajax_change_order_status', array($this,'hb_ajax_change_order_status') );
+            add_action( 'admin_enqueue_scripts', array($this,'hb_enqueue_order_status_script') );
 
 
+
+        }
+
+        public function hb_remove_add_new_submenu() {
+            remove_submenu_page( 'edit.php?post_type=nehabi-hotel-booking', 'post-new.php?post_type=nehabi-hotel-booking' );
+            }
+
+        public function hb_hide_add_new_button() {
+            $screen = get_current_screen();
+            if ( $screen->post_type === 'nehabi-hotel-booking' && $screen->base === 'edit' ) {
+                echo '<style>.page-title-action { display:none !important; }</style>';
+            }
         }
 
         public function order_the_table( $columns ){
@@ -95,19 +111,19 @@ if (!class_exists('Nehabi_Hotel_CPT')) {
 
             switch( $column ) {
                 case 'status':
-                $current_status = $order->get_status(); // e.g. "processing"
-                $statuses = wc_get_order_statuses(); ?>
+                    $current_status = $order->get_status();           // e.g., "processing"
+                    $statuses       = wc_get_order_statuses();
+                    ?>
 
-                <select class="order-status-select" data-order-id="<?php echo esc_attr( $order_id ); ?>">
-                    <?php foreach ( $statuses as $status_key => $status_label ) : 
-                        // convert "wc-processing" to "processing" for comparison
-                        $key_slug = str_replace('wc-', '', $status_key); ?>
-                        
-                        <option value="<?php echo esc_attr( $status_key ); ?>" <?php selected( $current_status, $key_slug ); ?>>
-                            <?php echo esc_html( $status_label ); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                    <select class="order-status-select" data-order-id="<?php echo esc_attr( $order_id ); ?>">
+                        <?php foreach ( $statuses as $status_key => $status_label ) :
+                            // convert "wc-processing" to "processing" for comparison
+                            $key_slug = str_replace( 'wc-', '', $status_key ); ?>
+                            <option value="<?php echo esc_attr( $status_key ); ?>" <?php selected( $current_status, $key_slug ); ?>>
+                                <?php echo esc_html( $status_label ); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
             <?php
                 break;
 
@@ -149,6 +165,42 @@ if (!class_exists('Nehabi_Hotel_CPT')) {
                 //     echo $guests ? esc_html( $guests ) : '-';
                 //     break;
             }
+        }
+
+       /**
+        * Summary of hb_ajax_change_order_status
+        */
+       public  function hb_ajax_change_order_status() {
+            check_ajax_referer( 'hb_change_order_status_nonce' );
+
+            $order_id   = intval( $_POST['order_id'] );
+            $new_status = sanitize_text_field( $_POST['new_status'] );
+
+            if ( $order_id && $new_status ) {
+                $order = wc_get_order( $order_id );
+                if ( $order ) {
+                    $order->update_status( $new_status );
+                    wp_send_json_success();
+                }
+            }
+            wp_send_json_error();
+        }
+
+
+        public function hb_enqueue_order_status_script() {
+            wp_enqueue_script(
+                'hb-order-status',
+                Nehabi_Hotel_Booking_PATH . 'asset/js/order-status.js',
+                ['jquery'],
+                '1.0',
+                true
+            );
+
+            wp_localize_script(
+                'hb-order-status',
+                'myOrderStatus',
+                [ 'nonce' => wp_create_nonce( 'hb_change_order_status_nonce' ) ]
+            );
         }
     }
 }
