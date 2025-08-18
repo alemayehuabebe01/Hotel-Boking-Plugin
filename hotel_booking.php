@@ -184,6 +184,12 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             wp_register_script( 'pdfmake', 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js', array('jquery'), null, true );
             wp_register_script( 'vfs_fonts', 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js', array('jquery'), null, true );
 
+            wp_register_script( 'toastr', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js', [], '2.1.4', true );
+            wp_register_style( 'toastr-css', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css', [], '2.1.4' );  
+
+            wp_enqueue_style('toastr-css');
+            wp_enqueue_script('toastr');
+
         }
 
        
@@ -220,29 +226,25 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
         }
 
         public function nehabi_homes_templates_load($template) {
-
             global $post, $wp_query, $wpdb;
-        
-            $nehabi_page_temp_slug = get_page_template_slug($post->ID);
-        
-            
-            if (!empty($nehabi_page_temp_slug) && isset($nehabi_page_temp_slug)) {
-                
-                $custom_template_path = Nehabi_Hotel_Booking_PATH . 'views/templates/' . $nehabi_page_temp_slug;
-        
-               
-                if (file_exists($custom_template_path)) {
-                     
-                    $template = $custom_template_path;
-                } else {
-                     
-                    error_log("Template not found: " . $custom_template_path);
+
+            if ( isset($post) && $post instanceof WP_Post ) {
+                $nehabi_page_temp_slug = get_page_template_slug($post->ID);
+
+                if ( !empty($nehabi_page_temp_slug) ) {
+                    $custom_template_path = Nehabi_Hotel_Booking_PATH . 'views/templates/' . $nehabi_page_temp_slug;
+
+                    if ( file_exists($custom_template_path) ) {
+                        $template = $custom_template_path;
+                    } else {
+                        error_log("Template not found: " . $custom_template_path);
+                    }
                 }
             }
-        
-             
+
             return $template;
         }
+
 
         public function load_custom_nehabi_single_template( $tpl ){  
                  

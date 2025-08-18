@@ -1,22 +1,23 @@
-jQuery(document).ready(function ($) {
-    $('.order-status-select').on('change', function () {
+jQuery(function ($) {
+    $(document).on('change', '.hb-order-status-select', function () {
         var orderId = $(this).data('order-id');
-        var newStatus = $(this).val(); // e.g., "wc-completed"
+        var newStatus = $(this).val();
+        var nonce = $(this).data('nonce');
 
         $.ajax({
-            url: ajaxurl,
-            type: 'POST',
+            url: myOrderStatus.ajax,
+            method: 'POST',
             data: {
                 action: 'change_order_status',
                 order_id: orderId,
                 new_status: newStatus,
-                _ajax_nonce: myOrderStatus.nonce
+                _ajax_nonce: nonce
             },
-            success: function (response) {
-                alert('Order status updated!');
+            success: function (resp) {
+                toastr.success('Order status updated successfully');
             },
             error: function () {
-                alert('Error updating order status.');
+                toastr.error('Error updating order status');
             }
         });
     });

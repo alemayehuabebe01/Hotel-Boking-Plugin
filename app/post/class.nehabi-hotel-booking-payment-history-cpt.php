@@ -6,6 +6,8 @@ if (!class_exists('Nehabi_Hotel_Booking_Payment_CPT')) {
         public function __construct() {
             add_action('init', array($this, 'register_payment_history_cpt'));
             add_action('admin_menu', array($this, 'add_payment_history_submenu'));
+            add_action( 'admin_menu', array( $this, 'hb_remove_add_new_submenu' ), 999 );
+			add_action( 'admin_head', array( $this, 'hb_hide_add_new_button' ) );
         }
 
         public function register_payment_history_cpt() {
@@ -41,6 +43,17 @@ if (!class_exists('Nehabi_Hotel_Booking_Payment_CPT')) {
                 )
             );
         }
+
+        public function hb_remove_add_new_submenu() {
+			remove_submenu_page( 'edit.php?post_type=nh_payment', 'post-new.php?post_type=nh_payment' );
+		}
+
+		public function hb_hide_add_new_button() {
+			$screen = get_current_screen();
+			if ( $screen->post_type === 'nh_payment' && $screen->base === 'edit' ) {
+				echo '<style>.page-title-action{display:none!important;}</style>';
+			}
+		}
 
         public function add_payment_history_submenu() {
             add_submenu_page(
