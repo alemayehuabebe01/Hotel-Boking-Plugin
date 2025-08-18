@@ -166,10 +166,10 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
                     update_post_meta( $order_id, 'accommodation_id', sanitize_text_field( $_POST['accommodation_id'] ) );
                 }
                 if ( isset( $_POST['checkin'] ) ) {
-                    update_post_meta( $order_id, 'check_in', sanitize_text_field( $_POST['check_in'] ) );
+                    update_post_meta( $order_id, 'checkin', sanitize_text_field( $_POST['checkin'] ) );
                 }
                 if ( isset( $_POST['checkout'] ) ) {
-                    update_post_meta( $order_id, 'check_out', sanitize_text_field( $_POST['check_out'] ) );
+                    update_post_meta( $order_id, 'checkout', sanitize_text_field( $_POST['checkout'] ) );
                 }
             }
 

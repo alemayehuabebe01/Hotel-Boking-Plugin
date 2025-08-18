@@ -9,6 +9,7 @@ get_header();
 <!-- Add Bootstrap CDN links in the template -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <div class="container-fluid px-0">
 
@@ -261,10 +262,6 @@ get_header();
 
 
 
-
-
-
-
                    <div id="booking-form" class="card border-0 shadow-sm sticky-top" style="top: 20px;">
                         <div class="card-body p-4">
                             <h3 class="mb-4 text-center">Reserve Your Stay</h3>
@@ -323,7 +320,7 @@ get_header();
                                             <input type="text" name="fullname" class="form-control" required>
                                         </div>
                                     </div>
-
+<!-- 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Email</label>
                                         <div class="input-group">
@@ -338,22 +335,48 @@ get_header();
                                             <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
                                             <input type="tel" name="phone" class="form-control">
                                         </div>
-                                    </div>
+                                    </div> -->
 
-                                    <div class="mb-4">
+                                    <!-- <div class="mb-4">
                                         <label class="form-label fw-semibold">Special Requests</label>
                                         <textarea name="requests" rows="3" class="form-control" placeholder="Any special requirements..."></textarea>
-                                    </div>
+                                    </div> -->
 
                                     <!-- Total Price Display -->
                                     <div class="mb-4">
                                         <h5>Total: <span id="total_price">0</span> ETB</h5>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
+                                    <!-- <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
                                         Confirm Booking
-                                    </button>
+                                    </button> -->
+                        <button id="confirmBookingBtn" type="button" class="btn btn-primary w-100 py-3 fw-bold">
+                                                Confirm Booking
+                        </button>
                                 </form>
+
+                                <!-- modal popup for comformation -->
+
+
+                                <div class="modal fade" id="bookingConfirmModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirm Booking</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to continue to checkout with this booking?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="button" id="modalConfirmBtn" class="btn btn-primary">Yes, Continue</button>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+
+
 
                                 <div class="text-center mt-3">
                                     <small class="text-muted">
@@ -458,4 +481,38 @@ get_header();
     <?php endwhile; ?>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmButton = document.getElementById('confirmBookingBtn');
+    const form         = document.querySelector('#booking-form form');
+
+    confirmButton.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Confirm Booking?',
+            text: 'Are you sure you want to proceed to checkout with this reservation?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, continue',
+            cancelButtonText: 'No, go back',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-success mx-2',
+                cancelButton: 'btn btn-danger mx-2'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+
+
+ 
 <?php get_footer(); ?>

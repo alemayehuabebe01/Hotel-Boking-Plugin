@@ -84,19 +84,40 @@ if (!class_exists('Nehabi_Hotel_CPT')) {
 
         public function wishu_booking_custom_column_content( $column, $post_id ) {
             $order_id = get_post_meta( $post_id, 'order_id', true );
+            
             if ( ! $order_id ) return;
 
             $order = wc_get_order( $order_id );
+            $order = wc_get_order( $order_id );
+
+
             if ( ! $order ) return;
 
             switch( $column ) {
                 case 'status':
-                    echo wc_get_order_status_name( $order->get_status() );
-                    break;
+                $current_status = $order->get_status(); // e.g. "processing"
+                $statuses = wc_get_order_statuses(); ?>
+
+                <select class="order-status-select" data-order-id="<?php echo esc_attr( $order_id ); ?>">
+                    <?php foreach ( $statuses as $status_key => $status_label ) : 
+                        // convert "wc-processing" to "processing" for comparison
+                        $key_slug = str_replace('wc-', '', $status_key); ?>
+                        
+                        <option value="<?php echo esc_attr( $status_key ); ?>" <?php selected( $current_status, $key_slug ); ?>>
+                            <?php echo esc_html( $status_label ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            <?php
+                break;
 
                 case 'check_dates':
-                    $check_in  = $order->get_meta( 'checkin' );  // from order meta
-                    $check_out = $order->get_meta( 'checkout' ); // from order meta
+                    foreach ( $order->get_items() as $item_id => $item ) {
+                            $accommodation_id = $item->get_meta('accommodation_id');
+                            $check_in         = $item->get_meta('Check-in');
+                            $check_out        = $item->get_meta('Check-out');
+                        }
+                
                     echo $check_in && $check_out ? esc_html( $check_in . ' / ' . $check_out ) : '-';
                     break;
 
@@ -110,10 +131,13 @@ if (!class_exists('Nehabi_Hotel_CPT')) {
                     break;
 
                 case 'accommodation':
-                    $acc_id = $order->get_meta( 'accommodation_id' ); // from order meta
-                    if ( $acc_id ) {
-                        $acc_post = get_post( $acc_id );
-                        echo $acc_post ? esc_html( $acc_post->post_title ) : esc_html( $acc_id );
+                    foreach ( $order->get_items() as $item_id => $item ) {
+                            $accommodation_id = $item->get_meta('accommodation_id');
+                        }
+                    
+                    if ( $accommodation_id ) {
+                        $acc_post = get_post( $accommodation_id );
+                        echo $acc_post ? esc_html( $acc_post->post_title ) : esc_html( $accommodation_id );
                     } else {
                         echo '-';
                     }
