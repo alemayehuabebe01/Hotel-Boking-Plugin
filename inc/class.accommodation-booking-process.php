@@ -197,29 +197,41 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
      * When order is marked completed: update room count & send email
      */
     public function process_completed_order($order_id) {
-        $order = wc_get_order($order_id);
-        foreach ($order->get_items() as $item) {
-            $accommodation_id = $item->get_meta('accommodation_id');
-            $checkin  = $item->get_meta('Check-in');
-            $checkout = $item->get_meta('Check-out');
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments'; // your custom table
 
-            if ($accommodation_id) {
-                // Reduce available rooms
-                $total_rooms = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
-                if ($total_rooms > 0) {
-                    update_post_meta($accommodation_id, '_accommodation_count', max(0, $total_rooms - 1));
+            $order = wc_get_order($order_id);
+            if (!$order) return;
+
+            foreach ($order->get_items() as $item) {
+                $accommodation_id = $item->get_meta('accommodation_id');
+                $checkin  = $item->get_meta('Check-in');
+                $checkout = $item->get_meta('Check-out');
+
+                if ($accommodation_id) {
+                    // Reduce available rooms
+                    $total_rooms = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
+                    if ($total_rooms > 0) {
+                        update_post_meta($accommodation_id, '_accommodation_count', max(0, $total_rooms - 1));
+                    }
+
+                    // Mark as booked if no rooms left
+                    if ($total_rooms - 1 <= 0) {
+                        update_post_meta($accommodation_id, '_room_status', 'booked');
+                    }
+
+                    // Send confirmation email
+                    $this->send_booking_email($order->get_billing_email(), $accommodation_id, $checkin, $checkout);
                 }
 
-                // Mark as booked if no rooms left
-                if ($total_rooms - 1 <= 0) {
-                    update_post_meta($accommodation_id, '_room_status', 'booked');
-                }
-
-                // Send confirmation email
-                $this->send_booking_email($order->get_billing_email(), $accommodation_id, $checkin, $checkout);
+                // Update custom table to mark this booking as completed
+                $wpdb->update(
+                    $table_name,
+                    ['status' => 'completed'], // set status
+                    ['order_id' => $order_id]  // where clause
+                );
             }
         }
-    }
 
     /**
      * Send booking confirmation email
