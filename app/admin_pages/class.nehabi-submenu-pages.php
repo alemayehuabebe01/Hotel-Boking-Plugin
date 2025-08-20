@@ -37,6 +37,15 @@ if (!class_exists('Nehabi_Hotel_Admin_Pages')) {
                //booking cpt submenu added here 
             add_submenu_page(
                 'edit.php?post_type=nehabi-hotel-booking',
+                __('Payment Information', 'hotel-booking'),
+                __('Payments', 'hotel-booking'),
+                'manage_options',
+                'accommodation-payment',
+                array($this, 'render_payment_page')
+            );
+
+            add_submenu_page(
+                'edit.php?post_type=nehabi-hotel-booking',
                 __('Calander', 'hotel-booking'),
                 __('Calander', 'hotel-booking'),
                 'manage_options',
@@ -53,6 +62,7 @@ if (!class_exists('Nehabi_Hotel_Admin_Pages')) {
                 array($this, 'render_customer_page')
             );
 
+
             add_submenu_page(
                 'edit.php?post_type=nehabi-hotel-booking',
                 __('Accommodation Report', 'hotel-booking'),
@@ -62,7 +72,14 @@ if (!class_exists('Nehabi_Hotel_Admin_Pages')) {
                 array($this, 'render_report_page')
             );
 
-            
+        }
+
+        public function render_payment_page(){
+            if (!current_user_can('manage_options')) {
+                wp_die(__('You do not have sufficient permissions to access this page.'));
+            }
+
+            require_once(Nehabi_Hotel_Booking_PATH . 'views/templates/nehabi_hotel_all_payment_info.php');
         }
 
         public function render_settings_page() {

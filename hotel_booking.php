@@ -48,9 +48,6 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotel-season-cpt.php' );
             $Nehabi_Hotel_Seasons_CPT = New Nehabi_Hotel_Seasons_CPT();
 
-            require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotel-booking-payment-history-cpt.php' );
-            $Nehabi_Hotel_Booking_Payment_CPT = New Nehabi_Hotel_Booking_Payment_CPT();
-
             require_once( Nehabi_Hotel_Booking_PATH . 'app/admin_pages/class.nehabi-submenu-pages.php' );
             $Nehabi_Hotel_Booking_Admin_Pages = New Nehabi_Hotel_Admin_Pages();
 
@@ -217,10 +214,14 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             wp_register_script( 'toastr', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js', [], '2.1.4', true );
             wp_register_style( 'toastr-css', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css', [], '2.1.4' );  
 
+            wp_register_style('datatables', 'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css');
+    wp_register_script('datatables', 'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js', array('jquery'), null, true);
+
             wp_enqueue_style('toastr-css');
             wp_enqueue_script('toastr');
 
         }
+
 
        
     
