@@ -26,29 +26,59 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
         
 
     public function wishu_save_booking_to_cpt( $order_id ) {
-        $order = wc_get_order( $order_id );
-        if ( ! $order ) return;
+            $order = wc_get_order( $order_id );
+            if ( ! $order ) return;
 
-        // Get meta
-        $accommodation_id = $order->get_meta( 'accommodation_id' );
-        $check_in         = $order->get_meta( 'checkin' );
-        $check_out        = $order->get_meta( 'checkout' );
-        $customer_name    = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+            foreach ( $order->get_items() as $item ) {
+                $accommodation_id = $item->get_meta('accommodation_id');
+                $check_in         = $item->get_meta('Check-in');
+                $check_out        = $item->get_meta('Check-out');
 
-        // Create CPT post
-        $booking_id = wp_insert_post( array(
-            'post_type'   => 'nehabi-hotel-booking',
-            'post_title'  => "Booking #{$order_id} - {$customer_name}",
-            'post_status' => 'publish',
-        ) );
+                if ( ! $accommodation_id ) continue;
 
-        if ( $booking_id ) {
-            update_post_meta( $booking_id, 'accommodation_id', $accommodation_id );
-            update_post_meta( $booking_id, 'checkin', $check_in );
-            update_post_meta( $booking_id, 'checkout', $check_out );
-            update_post_meta( $booking_id, 'order_id', $order_id );
+                $customer_name = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+                $customer_email = $order->get_billing_email();
+                $current_status = $order ? $order->get_status() : 'pending';
+                // Create the CPT booking
+                $booking_id = wp_insert_post([
+                    'post_type'   => 'nehabi-hotel-booking',
+                    'post_title'  => "Booking #{$order_id} - {$customer_name}",
+                    'post_status' => 'publish',
+                ]);
+
+                if ( $booking_id ) {
+
+                    update_post_meta( $booking_id, 'accommodation_id', $accommodation_id );
+                    update_post_meta( $booking_id, 'checkin', $check_in );
+                    update_post_meta( $booking_id, 'checkout', $check_out );
+                    update_post_meta( $booking_id, 'order_id', $order_id );
+                    update_post_meta( $booking_id, 'customer_name', $customer_name );
+                    update_post_meta( $booking_id, 'customer_email', $customer_email );
+
+
+                     // Insert into custom table
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+                    $wpdb->insert(
+                        $table_name,
+                        [
+                            'booking_id'       => $booking_id,
+                            'order_id'         => $order_id,
+                            'payment_method'   => $order->get_payment_method_title(),
+                            'payment_total'    => $order->get_total(),
+                            'transaction_id'   => $order->get_transaction_id(),
+                            'status'           => $current_status,
+                            'customer_name'    => $customer_name,
+                            'customer_email'   => $customer_email,
+                            'check_in'         => $check_in,
+                            'check_out'        => $check_out,
+                            'accommodation_id' => $accommodation_id,
+                        ]
+                    );
+                }
+            }
         }
-    }
 
     /**
      * Create hidden booking product if it doesn't exist

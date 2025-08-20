@@ -104,9 +104,39 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             add_filter( 'woocommerce_checkout_fields' , array($this,'wishu_add_booking_fields') );
             add_filter( 'woocommerce_checkout_fields', array($this,'wishu_remove_default_checkout_fields'), 20, 1 );
             add_action( 'woocommerce_checkout_update_order_meta', array($this,'wishu_save_custom_checkout_fields_to_order') );
-
+            register_activation_hook( __FILE__, array($this,'wishu_create_payment_table') );
+            
 
           
+        }
+
+      public function wishu_create_payment_table() {
+            global $wpdb;
+
+            $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+            $charset_collate = $wpdb->get_charset_collate();
+
+            $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+                id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                booking_id BIGINT(20) UNSIGNED NOT NULL,
+                order_id BIGINT(20) UNSIGNED NOT NULL,
+                payment_method VARCHAR(100),
+                payment_total DECIMAL(10,2),
+                transaction_id VARCHAR(100),
+                status VARCHAR(50),
+                customer_name VARCHAR(200),
+                customer_email VARCHAR(200),
+                check_in DATE,
+                check_out DATE,
+                accommodation_id BIGINT(20) UNSIGNED,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY booking_id (booking_id),
+                KEY order_id (order_id)
+            ) $charset_collate;";
+
+            require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+            dbDelta( $sql );
         }
 
 
