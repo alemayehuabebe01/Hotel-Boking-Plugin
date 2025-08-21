@@ -18,9 +18,8 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
         // Ensure booking product exists
         add_action('init', [$this, 'ensure_booking_product']);
         add_action( 'woocommerce_checkout_order_processed',[$this,'wishu_save_booking_to_cpt'] , 10, 1 );
-  
-
-
+        add_action( 'woocommerce_order_status_cancelled', array($this,'nehabi_release_room'));
+   
     }
 
         
@@ -232,6 +231,28 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
                 );
             }
         }
+
+        // Release room when order is cancelled
+        public function nehabi_release_room($order_id) {
+            global $wpdb;
+            $order = wc_get_order( $order_id );
+            foreach( $order->get_items() as $item ) {
+                $accommodation_id = $item->get_meta('accommodation_id');
+
+                // increase room count back
+                $total = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
+                update_post_meta($accommodation_id, '_accommodation_count', $total + 1);
+
+                update_post_meta($accommodation_id, '_room_status', 'available');
+
+                // also update your custom table status
+                $table = $wpdb->prefix.'wishu_nehabi_hotel_payments';
+                $wpdb->update($table, ['status'=>'cancelled'], ['order_id'=> $order_id]);
+            }
+        }
+
+        
+
 
     /**
      * Send booking confirmation email

@@ -7,7 +7,7 @@ global $wpdb;
 $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
 
 // Fetch all completed payments
-$payments = $wpdb->get_results( "SELECT * FROM $table_name WHERE status = 'completed' ORDER BY id DESC" );
+$payments = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC" );
 ?>
 
 <div class="wrap">

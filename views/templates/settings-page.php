@@ -5,8 +5,7 @@
 
     <h2 class="nav-tab-wrapper">
         <a href="?post_type=accommodation&page=accommodation-settings&tab=general" class="nav-tab <?php echo $active_tab === 'general' ? 'nav-tab-active' : ''; ?>">General</a>
-        <a href="?post_type=accommodation&page=accommodation-settings&tab=email" class="nav-tab <?php echo $active_tab === 'email' ? 'nav-tab-active' : ''; ?>">Email</a>
-        <a href="?post_type=accommodation&page=accommodation-settings&tab=customer" class="nav-tab <?php echo $active_tab === 'customer' ? 'nav-tab-active' : ''; ?>">Customer Email</a>
+        <a href="?post_type=accommodation&page=accommodation-settings&tab=customize" class="nav-tab <?php echo $active_tab === 'customer' ? 'nav-tab-active' : ''; ?>">Customize Email</a>
     </h2>
 
     <form method="post" action="options.php">
@@ -18,11 +17,7 @@
                 submit_button('Save Settings');
                 break;
 
-            case 'email':
-                echo '<p>Coming soon: Email configuration.</p>';
-                break;
-
-            case 'customer':
+            case 'customize':
                 echo '<p>Coming soon: Customer email templates.</p>';
                 break;
 

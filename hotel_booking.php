@@ -219,7 +219,6 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
 
             wp_enqueue_style('toastr-css');
             wp_enqueue_script('toastr');
-
         }
 
 

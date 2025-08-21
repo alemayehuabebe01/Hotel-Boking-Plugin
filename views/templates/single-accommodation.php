@@ -10,6 +10,136 @@ get_header();
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.min.css">
+<!-- Flatpickr CSS & JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+.flatpickr-calendar {
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+}
+
+.flatpickr-day {
+    border-radius: 8px;
+    border: none;
+    margin: 2px;
+    font-weight: 500;
+}
+
+.flatpickr-day.selected {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    font-weight: 600;
+}
+
+.flatpickr-day.inRange {
+    background: #dbeafe;
+    border-color: #dbeafe;
+    color: #1e40af;
+    box-shadow: none;
+}
+
+.flatpickr-day.booked {
+    background: #fef2f2;
+    color: #dc2626;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
+.flatpickr-day.booked:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.flatpickr-day.today {
+    border: 2px solid #3b82f6;
+}
+
+.flatpickr-day:hover {
+    background: #eff6ff;
+    border-color: #3b82f6;
+}
+
+.flatpickr-months {
+    margin-bottom: 10px;
+}
+
+.flatpickr-month {
+    height: 60px;
+    background: #f8fafc;
+    border-radius: 12px 12px 0 0;
+}
+
+.flatpickr-current-month {
+    padding-top: 15px;
+    font-size: 1.1em;
+}
+
+.flatpickr-weekdays {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.flatpickr-weekday {
+    font-weight: 600;
+    color: #64748b;
+}
+
+.flatpickr-input {
+    background: white !important;
+    cursor: pointer;
+}
+
+.flatpickr-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-group-text {
+    border-right: none;
+    background: #f8fafc !important;
+}
+
+.form-control {
+    border-left: none;
+    background: white;
+}
+
+.form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: none;
+}
+
+#total_price {
+    color: #3b82f6;
+    font-weight: 700;
+    font-size: 1.2em;
+}
+
+#nights_count {
+    font-size: 0.9em;
+    color: #64748b;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+</style>
+
+
 
 <div class="container-fluid px-0">
 
@@ -291,6 +421,27 @@ get_header();
                                     <?php endif; ?>
                                 </div>
 
+                               <?php
+                                global $wpdb;
+
+                                // Fetch booked date ranges for this accommodation
+                                $booked_dates = [];
+                                $rows = $wpdb->get_results( $wpdb->prepare(
+                                    "SELECT check_in, check_out FROM {$wpdb->prefix}wishu_nehabi_hotel_payments 
+                                    WHERE accommodation_id = %d AND status = 'completed'",
+                                    $accommodation_id
+                                ) );
+
+                                foreach ( $rows as $r ) {
+                                    $start = strtotime( $r->check_in );
+                                    $end   = strtotime( $r->check_out );
+                                    for( $d = $start; $d <= $end; $d += 86400 ) {
+                                        $booked_dates[] = date( 'Y-m-d', $d );
+                                    }
+                                }
+                                ?>
+
+                                <!-- Booking Form -->
                                 <form method="POST" action="">
                                     <?php wp_nonce_field('wishu_booking_nonce', 'wishu_booking_nonce_field'); ?>
                                     <input type="hidden" name="accommodation_id" value="<?php echo esc_attr($accommodation_id); ?>">
@@ -301,7 +452,7 @@ get_header();
                                         <label class="form-label fw-semibold">Check-in</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-white"><i class="bi bi-calendar"></i></span>
-                                            <input type="date" name="checkin" id="checkin" class="form-control" min="<?php echo esc_attr($today); ?>" required>
+                                            <input type="text" name="checkin" id="checkin" class="form-control flatpickr" placeholder="Check-in date" required readonly>
                                         </div>
                                     </div>
 
@@ -309,7 +460,7 @@ get_header();
                                         <label class="form-label fw-semibold">Check-out</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-white"><i class="bi bi-calendar"></i></span>
-                                            <input type="date" name="checkout" id="checkout" class="form-control" min="<?php echo esc_attr($tomorrow); ?>" required>
+                                            <input type="text" name="checkout" id="checkout" class="form-control flatpickr" placeholder="Check-out date" required readonly>
                                         </div>
                                     </div>
 
@@ -317,44 +468,19 @@ get_header();
                                         <label class="form-label fw-semibold">Full Name</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-                                            <input type="text" name="fullname" class="form-control" required>
-                                        </div>
-                                    </div>
-<!-- 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Email</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
-                                            <input type="email" name="email" class="form-control" required>
+                                            <input type="text" name="fullname" class="form-control" placeholder="Enter your full name" required>
                                         </div>
                                     </div>
 
-                                    <div class="mb-4">
-                                        <label class="form-label fw-semibold">Phone</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
-                                            <input type="tel" name="phone" class="form-control">
-                                        </div>
-                                    </div> -->
-
-                                    <!-- <div class="mb-4">
-                                        <label class="form-label fw-semibold">Special Requests</label>
-                                        <textarea name="requests" rows="3" class="form-control" placeholder="Any special requirements..."></textarea>
-                                    </div> -->
-
-                                    <!-- Total Price Display -->
                                     <div class="mb-4">
                                         <h5>Total: <span id="total_price">0</span> ETB</h5>
+                                        <small class="text-muted" id="nights_count">0 nights</small>
                                     </div>
 
-                                    <!-- <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
+                                    <button id="confirmBookingBtn" type="button" class="btn btn-primary w-100 py-3 fw-bold">
                                         Confirm Booking
-                                    </button> -->
-                        <button id="confirmBookingBtn" type="button" class="btn btn-primary w-100 py-3 fw-bold">
-                                                Confirm Booking
-                        </button>
-                                </form>
-
+                                    </button>
+                            </form>
                                 <!-- modal popup for comformation -->
 
 
@@ -512,7 +638,73 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<script>
+jQuery(function($){
+    // Convert PHP booked dates to JavaScript array
+    var disabledDates = <?php echo json_encode($booked_dates); ?>;
+    
+    // Initialize Flatpickr for check-in
+    var checkinPicker = flatpickr("#checkin", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates, // This disables the booked dates
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                // Set checkout min date to check-in + 1 day
+                var minCheckoutDate = new Date(selectedDates[0]);
+                minCheckoutDate.setDate(minCheckoutDate.getDate() + 1);
+                
+                checkoutPicker.set('minDate', minCheckoutDate);
+                checkoutPicker.set('enable', true);
+                
+                // If checkout is before new min date, clear it
+                if (checkoutPicker.selectedDates[0] && checkoutPicker.selectedDates[0] <= minCheckoutDate) {
+                    checkoutPicker.clear();
+                }
+                
+                calculateTotal();
+            }
+        },
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+            // Optional: Add visual styling to booked dates
+            var dateStr = dayElem.dateObj.toISOString().split('T')[0];
+            if (disabledDates.includes(dateStr)) {
+                dayElem.classList.add('booked');
+                dayElem.title = "Already booked";
+            }
+        }
+    });
 
+    // Initialize Flatpickr for checkout
+    var checkoutPicker = flatpickr("#checkout", {
+        dateFormat: "Y-m-d",
+        minDate: new Date().fp_incr(1),
+        disable: disabledDates, // This disables the booked dates
+        onChange: function(selectedDates, dateStr, instance) {
+            calculateTotal();
+        },
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+            // Optional: Add visual styling to booked dates
+            var dateStr = dayElem.dateObj.toISOString().split('T')[0];
+            if (disabledDates.includes(dateStr)) {
+                dayElem.classList.add('booked');
+                dayElem.title = "Already booked";
+            }
+        }
+    });
+
+     
+});
+</script>
+
+
+
+<!-- jQuery UI JS -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+ <!-- jQuery (WP already loads this usually) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
  
+
 <?php get_footer(); ?>
