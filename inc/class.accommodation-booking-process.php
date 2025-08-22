@@ -18,8 +18,7 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
         // Ensure booking product exists
         add_action('init', [$this, 'ensure_booking_product']);
         add_action( 'woocommerce_checkout_order_processed',[$this,'wishu_save_booking_to_cpt'] , 10, 1 );
-        add_action( 'woocommerce_order_status_cancelled', array($this,'nehabi_release_room'));
-   
+        add_action( 'woocommerce_order_status_cancelled', array($this,'process_cancelled_order'));
     }
 
         
@@ -233,22 +232,75 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
         }
 
         // Release room when order is cancelled
-        public function nehabi_release_room($order_id) {
+        public function process_cancelled_order($order_id) {
             global $wpdb;
-            $order = wc_get_order( $order_id );
-            foreach( $order->get_items() as $item ) {
+            $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+            $order = wc_get_order($order_id);
+            if (!$order) return;
+
+            foreach ($order->get_items() as $item) {
                 $accommodation_id = $item->get_meta('accommodation_id');
+                $checkin  = $item->get_meta('Check-in');
+                $checkout = $item->get_meta('Check-out');
 
-                // increase room count back
-                $total = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
-                update_post_meta($accommodation_id, '_accommodation_count', $total + 1);
+                if ($accommodation_id) {
+                    // Restore available rooms
+                    $total_rooms = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
+                    update_post_meta($accommodation_id, '_accommodation_count', $total_rooms + 1);
 
-                update_post_meta($accommodation_id, '_room_status', 'available');
+                    // Mark as available if rooms are greater than 0
+                    if ($total_rooms + 1 > 0) {
+                        update_post_meta($accommodation_id, '_room_status', 'available');
+                    }
 
-                // also update your custom table status
-                $table = $wpdb->prefix.'wishu_nehabi_hotel_payments';
-                $wpdb->update($table, ['status'=>'cancelled'], ['order_id'=> $order_id]);
+                    // Send cancellation email
+                    $this->send_cancellation_email(
+                        $order->get_billing_email(),
+                        $accommodation_id,
+                        $checkin,
+                        $checkout
+                    );
+                }
+
+                // Update custom table: mark cancelled + release dates
+                $wpdb->update(
+                    $table_name,
+                    [
+                        'status'   => 'cancelled',
+                        'checkin'  => null,
+                        'checkout' => null
+                    ],
+                    ['order_id' => $order_id]
+                );
             }
+        }
+
+        public function send_cancellation_email($to, $accommodation_id, $checkin, $checkout) {
+            // Accommodation name from CPT
+            $accommodation_name = get_the_title($accommodation_id);
+
+            // Email subject & body
+            $subject = sprintf(
+                __('Your booking has been cancelled: %s', 'text-domain'),
+                $accommodation_name
+            );
+
+            $message  = '<h2>' . __('Booking Cancelled', 'text-domain') . '</h2>';
+            $message .= '<p>' . sprintf(__('We regret to inform you that your booking for <strong>%s</strong> has been cancelled.', 'text-domain'), $accommodation_name) . '</p>';
+            $message .= '<p><strong>' . __('Check-in:', 'text-domain') . '</strong> ' . esc_html($checkin) . '</p>';
+            $message .= '<p><strong>' . __('Check-out:', 'text-domain') . '</strong> ' . esc_html($checkout) . '</p>';
+            $message .= '<p>' . __('If you believe this was a mistake or need further assistance, please contact our support team.', 'text-domain') . '</p>';
+            $message .= '<p>' . get_bloginfo('name') . '</p>';
+
+            // Headers (HTML email)
+            $headers = [
+                'Content-Type: text/html; charset=UTF-8',
+                'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>'
+            ];
+
+            // Send the email
+            wp_mail($to, $subject, $message, $headers);
         }
 
         

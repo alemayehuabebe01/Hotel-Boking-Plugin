@@ -389,27 +389,24 @@
                     <i class="fas fa-calendar-check"></i>
                 </div>
                 <?php
-
-                    global $wpdb;
-
+                global $wpdb;
                     $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
 
-                    $total_revenue = $wpdb->get_var( 
+                    $total_count = $wpdb->get_var( 
                         $wpdb->prepare(
-                            "SELECT * 
+                            "SELECT COUNT(*) 
                             FROM $table_name 
                             WHERE status = %s", 
                             'completed' 
                         ) 
                     );
-                    
-                    $total_count = $total_revenue->count();
-                    
-                    ?>
+
+                     
+                ?>
 
                     <div class="kpi-content">
                         <span class="kpi-title">Total Bookings</span>
-                        <span class="kpi-number"><?php echo $total_bookings; ?></span>
+                        <span class="kpi-number"><?php echo   $total_count; ?></span>
                     </div>
             </div>
             
@@ -417,9 +414,27 @@
                 <div class="kpi-icon" style="background-color: rgba(255,185,0,0.2); color: #ffb900;">
                     <i class="fas fa-clock"></i>
                 </div>
+
+                <?php
+                global $wpdb;
+                    $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+                    $total_pending_count = $wpdb->get_var( 
+                        $wpdb->prepare(
+                            "SELECT COUNT(*) 
+                            FROM $table_name 
+                            WHERE status = %s", 
+                            'Pending' 
+                        ) 
+                    );
+
+                     
+                ?>
+
+
                 <div class="kpi-content">
                     <span class="kpi-title">Pending</span>
-                    <span class="kpi-number">8</span>
+                    <span class="kpi-number"><?php echo  $total_pending_count; ?></span>
                 </div>
             </div>
             
@@ -427,9 +442,27 @@
                 <div class="kpi-icon" style="background-color: rgba(220,50,50,0.2); color: #dc3232;">
                     <i class="fas fa-times-circle"></i>
                 </div>
+
+                <?php
+                global $wpdb;
+                    $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+                    $total_cancelled_count = $wpdb->get_var( 
+                        $wpdb->prepare(
+                            "SELECT COUNT(*) 
+                            FROM $table_name 
+                            WHERE status = %s", 
+                            'Cancelled' 
+                        ) 
+                    );
+
+                     
+                ?>
+
+
                 <div class="kpi-content">
                     <span class="kpi-title">Cancelled</span>
-                    <span class="kpi-number">3</span>
+                    <span class="kpi-number"><?php echo $total_cancelled_count; ?></span>
                 </div>
             </div>
         </div>
@@ -441,6 +474,54 @@
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-line-chart"></i> Revenue Trend</h2>
                 </div>
+
+                <?php
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+                    // Get revenue for last 7 days (grouped by day)
+                    $results = $wpdb->get_results(
+                        $wpdb->prepare(
+                            "SELECT DATE(created_at) as date, SUM(payment_total) as total
+                            FROM $table_name
+                            WHERE status = %s 
+                            AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+                            GROUP BY DATE(created_at)
+                            ORDER BY date ASC",
+                            'completed'
+                        )
+                    );
+
+                    // Build arrays for labels and data
+                    $labels = [];
+                    $data   = [];
+
+                    // Fill 7 days even if no revenue that day
+                    $period = new DatePeriod(
+                        new DateTime('-6 days'),
+                        new DateInterval('P1D'),
+                        new DateTime('+1 day')
+                    );
+
+                    foreach ($period as $day) {
+                        $date = $day->format('Y-m-d');
+                        $labels[] = $day->format('D'); // Mon, Tue, etc.
+
+                        // Find matching result
+                        $found = false;
+                        foreach ($results as $row) {
+                            if ($row->date === $date) {
+                                $data[] = (float) $row->total;
+                                $found = true;
+                                break;
+                            }
+                        }
+
+                        if (!$found) {
+                            $data[] = 0; // No revenue that day
+                        }
+                    }
+                    ?>
                 <div class="card-body">
                     <canvas id="revenueChart" height="250"></canvas>
                 </div>
@@ -451,6 +532,17 @@
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-chart-pie"></i> Bookings by Status</h2>
                 </div>
+
+                <?php
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+                    // Get counts for each status
+                    $confirmed = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", 'completed') );
+                    $pending   = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", 'pending') );
+                    $cancelled = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", 'cancelled') );
+                    $abandoned = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", 'abandoned') );
+                    ?>
                 <div class="card-body">
                     <canvas id="statusChart" height="250"></canvas>
                 </div>
@@ -459,32 +551,61 @@
         </div>
 
         <!-- Top Accommodations -->
-        <div class="">
-            <div class="card-header">
-                <h2 class="card-title"><i class="fas fa-bed"></i> Top Accommodations</h2>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="wp-list-table widefat fixed striped">
-                        <thead>
-                            <tr>
-                                <th>Accommodation</th>
-                                <th>Bookings</th>
-                                <th>Revenue</th>
-                                <th>Avg. Rate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Deluxe Room</td><td>20</td><td>₹5,500</td><td>₹275</td></tr>
-                            <tr><td>Luxury Suite</td><td>15</td><td>₹4,200</td><td>₹280</td></tr>
-                            <tr><td>Standard Room</td><td>10</td><td>₹2,100</td><td>₹210</td></tr>
-                            <tr><td>Family Villa</td><td>7</td><td>₹3,200</td><td>₹457</td></tr>
-                            <tr><td>Beach Bungalow</td><td>4</td><td>₹1,800</td><td>₹450</td></tr>
-                        </tbody>
-                    </table>
+       <?php
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+            // Get top accommodations by revenue
+            $results = $wpdb->get_results("
+                SELECT accommodation_id,
+                    COUNT(*) AS total_bookings,
+                    SUM(payment_total) AS total_revenue,
+                    ROUND(AVG(payment_total), 2) AS avg_rate
+                FROM $table_name
+                WHERE status = 'completed'
+                GROUP BY accommodation_id
+                ORDER BY total_revenue DESC
+                LIMIT 10
+            ");
+            ?>
+
+            <div class="">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-bed"></i> Top Accommodations</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="wp-list-table widefat fixed striped">
+                            <thead>
+                                <tr>
+                                    <th>Accommodation</th>
+                                    <th>Bookings</th>
+                                    <th>Revenue</th>
+                                    <th>Avg. Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ( $results ) : ?>
+                                    <?php foreach ( $results as $row ) : 
+                                        $accommodation_name = get_the_title($row->accommodation_id); 
+                                    ?>
+                                        <tr>
+                                            <td><?php echo esc_html($accommodation_name); ?></td>
+                                            <td><?php echo (int) $row->total_bookings; ?></td>
+                                            <td><?php echo wc_price( $row->total_revenue ); ?></td>
+                                            <td><?php echo wc_price( $row->avg_rate ); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr>
+                                        <td colspan="4">No completed bookings found.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <!-- Recommendations Section -->
         <div class="">
@@ -558,88 +679,88 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Revenue Line Chart
-            new Chart(document.getElementById('revenueChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-                    datasets: [{
-                        label: 'Revenue (₹)',
-                        borderColor: '#2271b1',
-                        backgroundColor: 'rgba(34,113,177,0.1)',
-                        data: [200, 450, 300, 600, 700, 900, 1200],
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointBackgroundColor: '#2271b1',
-                        pointRadius: 4
-                    }]
-                },
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        } 
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
+       
+    document.addEventListener("DOMContentLoaded", function() {
+        const revenueLabels = <?php echo json_encode($labels); ?>;
+        const revenueData   = <?php echo json_encode($data); ?>;
 
-            // Bookings by Status
-            new Chart(document.getElementById('statusChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: ["Confirmed", "Pending", "Cancelled", "Abandoned"],
-                    datasets: [{
-                        label: 'Bookings',
-                        backgroundColor: ['#46b450','#ffb900','#dc3232','#50575e'],
-                        data: [30, 8, 3, 2],
-                        borderRadius: 4,
-                        borderSkipped: false
-                    }]
+        new Chart(document.getElementById('revenueChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: revenueLabels,
+                datasets: [{
+                    label: 'Revenue (<?php echo get_woocommerce_currency_symbol(); ?>)',
+                    borderColor: '#2271b1',
+                    backgroundColor: 'rgba(34,113,177,0.1)',
+                    data: revenueData,
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#2271b1',
+                    pointRadius: 4
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    } 
                 },
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            display: false 
-                        } 
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { drawBorder: false }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false
-                            }
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+   
+
+
+                // Bookings by Status
+                new Chart(document.getElementById('statusChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ["Confirmed", "Pending", "Cancelled", "Abandoned"],
+                        datasets: [{
+                            label: 'Bookings',
+                            backgroundColor: ['#46b450','#ffb900','#dc3232','#50575e'],
+                            data: [
+                                <?php echo (int)$confirmed; ?>,
+                                <?php echo (int)$pending; ?>,
+                                <?php echo (int)$cancelled; ?>,
+                                <?php echo (int)$abandoned; ?>
+                            ],
+                            borderRadius: 4,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: { 
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: false } 
                         },
-                        x: {
-                            grid: {
-                                display: false
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { drawBorder: false }
+                            },
+                            x: {
+                                grid: { display: false }
                             }
                         }
                     }
-                }
-            });
+                });
             
             // Show/hide custom date range based on selection
             const rangeSelect = document.getElementById('range');
