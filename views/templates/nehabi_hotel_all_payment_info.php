@@ -1,7 +1,14 @@
 <?php
-
+// Enqueue DataTables core
 wp_enqueue_style('datatables');
 wp_enqueue_script('datatables');
+
+// Enqueue DataTables Buttons extension (Excel + Print)
+wp_enqueue_style('datatables-buttons', 'https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css');
+wp_enqueue_script('datatables-buttons', 'https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js', ['jquery', 'datatables'], null, true);
+wp_enqueue_script('datatables-jszip', 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', [], null, true);
+wp_enqueue_script('datatables-buttons-html5', 'https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js', ['datatables-buttons'], null, true);
+wp_enqueue_script('datatables-buttons-print', 'https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js', ['datatables-buttons'], null, true);
 
 global $wpdb;
 $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
@@ -12,6 +19,9 @@ $payments = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC" );
 
 <div class="wrap">
     <h1 class="wp-heading-inline">Booking Payments</h1>
+    <a href="#" class="page-title-action" id="refresh-payments">
+        <span class="dashicons dashicons-update"></span> Refresh
+    </a>
     <hr class="wp-header-end">
 
     <?php if ( ! $payments ) : ?>
@@ -19,38 +29,64 @@ $payments = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC" );
             <p>No completed payments found.</p>
         </div>
     <?php else : ?>
-        <table id="completed-payments-table" class="wp-list-table widefat fixed striped">
+        <div class="tablenav top">
+            <div class="alignleft actions">
+            </div>
+            <div class="tablenav-pages">
+                <span class="displaying-num"><?php echo count($payments); ?> items</span>
+            </div>
+        </div>
+
+        <table id="completed-payments-table" class="wp-list-table widefat fixed striped table-view-list">
             <thead>
                 <tr>
-                    <th>Booking ID</th>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Amount</th>
-                    <th>Payment Method</th>
-                    <th>Status</th>
-                    <th>Date</th>
+                    <th scope="col" class="column-primary">Booking ID</th>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col" class="num">Amount</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Date</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ( $payments as $payment ) : ?>
                     <tr>
-                        <td><?php echo esc_html( $payment->booking_id ); ?></td>
-                        <td><?php echo esc_html( $payment->order_id ); ?></td>
-                        <td>
-                            <strong><?php echo esc_html( $payment->customer_name ); ?></strong><br>
-                            <small class="text-muted"><?php echo esc_html( $payment->customer_email ); ?></small>
+                        <td class="column-primary" data-colname="Booking ID">
+                            <strong><?php echo esc_html( $payment->booking_id ); ?></strong>
+                            <button type="button" class="toggle-row">
+                                <span class="screen-reader-text">Show more details</span>
+                            </button>
                         </td>
-                        <td><strong><?php echo esc_html( get_woocommerce_currency_symbol() . number_format( $payment->payment_total, 2 ) ); ?></strong></td>
-                        <td><?php echo esc_html( $payment->payment_method ); ?></td>
-                        <td>
+                        <td data-colname="Order ID"><?php echo esc_html( $payment->order_id ); ?></td>
+                        <td data-colname="Customer">
+                            <strong><?php echo esc_html( $payment->customer_name ); ?></strong><br>
+                            <small><?php echo esc_html( $payment->customer_email ); ?></small>
+                        </td>
+                        <td data-colname="Amount" class="num">
+                            <strong><?php echo esc_html( get_woocommerce_currency_symbol() . number_format( $payment->payment_total, 2 ) ); ?></strong>
+                        </td>
+                        <td data-colname="Payment Method"><?php echo esc_html( $payment->payment_method ); ?></td>
+                        <td data-colname="Status">
                             <span class="payment-status <?php echo esc_attr( sanitize_title( $payment->status ) ); ?>">
                                 <?php echo esc_html( ucfirst( $payment->status ) ); ?>
                             </span>
                         </td>
-                        <td><?php echo esc_html( date( 'M j, Y \a\t g:i a', strtotime( $payment->created_at ) ) ); ?></td>
+                        <td data-colname="Date"><?php echo esc_html( date( 'M j, Y \a\t g:i a', strtotime( $payment->created_at ) ) ); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
+            <tfoot>
+                <tr>
+                    <th scope="col" class="column-primary">Booking ID</th>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col" class="num">Amount</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </tfoot>
         </table>
     <?php endif; ?>
 </div>
@@ -63,7 +99,8 @@ $payments = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC" );
     margin-top: 15px;
 }
 
-#completed-payments-table thead th {
+#completed-payments-table thead th,
+#completed-payments-table tfoot th {
     background: #f6f7f7;
     border-bottom: 2px solid #ccd0d4;
     font-weight: 600;
@@ -81,13 +118,18 @@ $payments = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC" );
     background-color: #f6f7f7;
 }
 
+#completed-payments-table th.num,
+#completed-payments-table td.num {
+    text-align: right;
+}
+
 .payment-status {
-    padding: 6px 12px;
+    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     display: inline-block;
-    min-width: 90px;
+    min-width: 80px;
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -99,104 +141,149 @@ $payments = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC" );
     border: 1px solid #c3e6cb;
 }
 
-.text-muted {
-    color: #6c757d !important;
+.payment-status.pending { 
+    background: #fff3cd; 
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.payment-status.failed { 
+    background: #f8d7da; 
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+small {
+    color: #646970 !important;
 }
 
 /* DataTables Controls Styling */
 .dataTables_wrapper {
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .dataTables_length,
-.dataTables_filter,
-.dataTables_info,
-.dataTables_paginate {
-    margin: 15px 0;
-    font-size: 13px;
+.dataTables_filter {
+    margin-bottom: 15px;
 }
 
 .dataTables_filter input {
     margin-left: 10px;
-    border: 1px solid #8c8f94;
-    padding: 6px 12px;
-    border-radius: 4px;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.07);
-    transition: all 0.2s ease;
-}
-
-.dataTables_filter input:focus {
-    border-color: #2271b1;
-    box-shadow: 0 0 0 1px #2271b1;
-    outline: 2px solid transparent;
-}
-
-.dataTables_length select {
-    margin: 0 10px;
-    border: 1px solid #8c8f94;
     padding: 4px 8px;
     border-radius: 4px;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+    border: 1px solid #8c8f94;
 }
 
-.dataTables_paginate .paginate_button {
+.dataTables_wrapper .dataTables_info {
+    color: #50575e;
+    padding: 10px 0;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding: 10px 0;
+}
+
+.dataTables_wrapper .paginate_button {
     padding: 4px 8px;
-    margin: 0 2px;
-    border: 1px solid #dcdcde;
-    border-radius: 3px;
-    background: #f6f7f7;
-    color: #2271b1;
-    text-decoration: none;
+    border: 1px solid #ccc;
+    margin-left: 2px;
+    border-radius: 4px;
+    background: #f7f7f7;
+    color: #0073aa;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
-.dataTables_paginate .paginate_button:hover {
-    background: #2271b1;
-    color: #fff;
-    border-color: #2271b1;
+.dataTables_wrapper .paginate_button.current {
+    background: #0073aa;
+    color: white;
+    border-color: #0073aa;
 }
 
-.dataTables_paginate .paginate_button.current {
-    background: #2271b1;
-    color: #fff;
-    border-color: #2271b1;
-    font-weight: 600;
+.dataTables_wrapper .paginate_button:hover {
+    background: #00a0d2;
+    color: white;
+    border-color: #00a0d2;
 }
 
-/* Responsive adjustments */
-@media screen and (max-width: 1200px) {
-    #completed-payments-table {
-        font-size: 13px;
+.dt-buttons {
+    margin-bottom: 15px;
+}
+
+.dt-button {
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    color: #0073aa;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dt-button:hover {
+    background: #00a0d2;
+    color: white;
+    border-color: #00a0d2;
+}
+
+#refresh-payments .dashicons {
+    font-size: 16px;
+    vertical-align: middle;
+    margin-top: -2px;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 782px) {
+    #completed-payments-table th.column-primary,
+    #completed-payments-table td.column-primary {
+        position: relative;
+        padding-right: 40px;
     }
     
-    #completed-payments-table thead th,
-    #completed-payments-table tbody td {
-        padding: 8px;
+    #completed-payments-table .toggle-row {
+        position: absolute;
+        right: 10px;
+        top: 10px;
     }
-}
-
-/* Loading overlay */
-.dataTables_wrapper .dataTables_processing {
-    background: rgba(255,255,255,0.9);
-    border: 1px solid #dcdcde;
-    border-radius: 4px;
-    padding: 20px;
-    font-weight: 600;
-    color: #2c3338;
+    
+    #completed-payments-table td:before {
+        content: attr(data-colname);
+        font-weight: 600;
+        padding-right: 10px;
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
+        padding: 6px 8px;
+    }
 }
 </style>
 
 <script>
 jQuery(document).ready(function($) {
-    $('#completed-payments-table').DataTable({
+    // Initialize DataTable
+    var table = $('#completed-payments-table').DataTable({
         "pageLength": 25,
         "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-        "order": [[6, "desc"]], // Sort by Date column (7th column) descending
+        "order": [[6, "desc"]], // Sort by Date column
         "responsive": true,
-        "dom": '<"top"<"dataTables-header"lf>>rt<"bottom"<"dataTables-footer"ip>><"clear">',
+        "dom": '<"top"<"dataTables-header"lfB>>rt<"bottom"<"dataTables-footer"ip>><"clear">',
+        "buttons": [
+            {
+                extend: 'excelHtml5',
+                title: 'Booking Payments',
+                className: 'button',
+                text: '<span class="dashicons dashicons-media-spreadsheet"></span> Export to Excel',
+                exportOptions: { columns: ':visible' }
+            },
+            {
+                extend: 'print',
+                title: 'Booking Payments',
+                className: 'button',
+                text: '<span class="dashicons dashicons-printer"></span> Print',
+                exportOptions: { columns: ':visible' }
+            }
+        ],
         "language": {
             "search": "Search payments:",
             "lengthMenu": "Show _MENU_ entries per page",
@@ -210,12 +297,26 @@ jQuery(document).ready(function($) {
                 "previous": "← Previous"
             },
             "processing": "Processing payments..."
-        },
-        "initComplete": function() {
-            // Add some custom classes after initialization
-            $('.dataTables_length').addClass('dataTables-controls');
-            $('.dataTables_filter').addClass('dataTables-controls');
         }
+    });
+    
+    // Add icons to buttons after they're created
+    setTimeout(function() {
+        $('.dt-button:first').prepend('<span class="dashicons dashicons-media-spreadsheet" style="vertical-align: middle; margin-right: 4px;"></span>');
+        $('.dt-button:last').prepend('<span class="dashicons dashicons-printer" style="vertical-align: middle; margin-right: 4px;"></span>');
+    }, 100);
+    
+    // Refresh button functionality
+    $('#refresh-payments').on('click', function(e) {
+        e.preventDefault();
+        var button = $(this);
+        button.addClass('updating-message');
+        
+        // Simulate refresh (in a real scenario, you'd reload data from server)
+        setTimeout(function() {
+            table.ajax.reload(null, false);
+            button.removeClass('updating-message');
+        }, 800);
     });
 });
 </script>
