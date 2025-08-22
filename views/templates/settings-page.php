@@ -18,7 +18,9 @@
                 break;
 
             case 'customize':
-                echo '<p>Coming soon: Customer email templates.</p>';
+                settings_fields('nehabi_hotel_email_group');
+                do_settings_sections('nehabi_email_settings_section');
+                submit_button('Save Settings');
                 break;
 
             default:

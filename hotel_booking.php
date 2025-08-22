@@ -214,11 +214,22 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             wp_register_script( 'toastr', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js', [], '2.1.4', true );
             wp_register_style( 'toastr-css', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css', [], '2.1.4' );  
 
+           wp_register_script(
+                'email-color-picker',
+                Nehabi_Hotel_Booking_PATH . 'asset/js/nehabi-admin.js',
+                array('jquery', 'wp-color-picker'),  
+                '2.1.4',
+                true
+            );
+
             wp_register_style('datatables', 'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css');
     wp_register_script('datatables', 'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js', array('jquery'), null, true);
 
             wp_enqueue_style('toastr-css');
             wp_enqueue_script('toastr');
+            wp_enqueue_script('email-color-picker');
+            wp_enqueue_style('wp-color-picker');
+            wp_enqueue_script('wp-color-picker');
         }
 
 

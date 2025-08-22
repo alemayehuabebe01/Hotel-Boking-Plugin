@@ -19,6 +19,7 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
         add_action('init', [$this, 'ensure_booking_product']);
         add_action( 'woocommerce_checkout_order_processed',[$this,'wishu_save_booking_to_cpt'] , 10, 1 );
         add_action( 'woocommerce_order_status_cancelled', array($this,'process_cancelled_order'));
+        add_action('init', [$this, 'setup_expired_booking_cron']);
     }
 
         
@@ -191,12 +192,12 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
         }
     }
 
-    /**
-     * When order is marked completed: update room count & send email
-     */
-    public function process_completed_order($order_id) {
+        /**
+         * When order is marked completed: update room count & send email
+         */
+        public function process_completed_order($order_id) {
             global $wpdb;
-            $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments'; // your custom table
+            $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
 
             $order = wc_get_order($order_id);
             if (!$order) return;
@@ -218,15 +219,15 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
                         update_post_meta($accommodation_id, '_room_status', 'booked');
                     }
 
-                    // Send confirmation email
-                    $this->send_booking_email($order->get_billing_email(), $accommodation_id, $checkin, $checkout);
+                    // Send confirmation email using template
+                    $this->send_booking_email($order->get_billing_email(), $accommodation_id, $checkin, $checkout,$order,$order_id);
                 }
 
                 // Update custom table to mark this booking as completed
                 $wpdb->update(
                     $table_name,
-                    ['status' => 'completed'], // set status
-                    ['order_id' => $order_id]  // where clause
+                    ['status' => 'completed'],
+                    ['order_id' => $order_id]
                 );
             }
         }
@@ -254,71 +255,374 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
                         update_post_meta($accommodation_id, '_room_status', 'available');
                     }
 
-                    // Send cancellation email
+                    // ✅ Update ALL rows for this order in custom table
+                    $sql = $wpdb->prepare(
+                        "UPDATE $table_name
+                        SET status = %s,
+                            check_in  = NULL,
+                            check_out = NULL
+                        WHERE order_id = %d",
+                        'cancelled',
+                        $order_id
+                    );
+
+                    $result = $wpdb->query($sql);
+
+                    // Debugging info (remove in production)
+                    error_log("Cancelled order update result: " . $result);
+                    error_log("Last SQL: " . $wpdb->last_query);
+                    error_log("Last error: " . $wpdb->last_error);
+
+                    // Send cancellation email using template
                     $this->send_cancellation_email(
                         $order->get_billing_email(),
                         $accommodation_id,
                         $checkin,
-                        $checkout
+                        $checkout,
+                        $order,
+                        $order_id
                     );
                 }
-
-                // Update custom table: mark cancelled + release dates
-                $wpdb->update(
-                    $table_name,
-                    [
-                        'status'   => 'cancelled',
-                        'checkin'  => null,
-                        'checkout' => null
-                    ],
-                    ['order_id' => $order_id]
-                );
             }
         }
 
-        public function send_cancellation_email($to, $accommodation_id, $checkin, $checkout) {
-            // Accommodation name from CPT
-            $accommodation_name = get_the_title($accommodation_id);
+        /**
+     * Send booking cancellation email using template from settings
+     */
+    public function send_cancellation_email($to, $accommodation_id, $checkin, $checkout,$order,$order_id) {
+        $email_options = get_option('nehabi_hotel_email_options');
+        
+        // Get template from settings or use default
+        $template = isset($email_options['cancellation_template']) ? 
+            $email_options['cancellation_template'] : 
+            $this->get_default_cancellation_template();
+        
+        // Get design settings
+        $primary_color = isset($email_options['primary_color']) ? $email_options['primary_color'] : '#3498db';
+        $secondary_color = isset($email_options['secondary_color']) ? $email_options['secondary_color'] : '#2ecc71';
+        $background_color = isset($email_options['background_color']) ? $email_options['background_color'] : '#f8f9fa';
+        $text_color = isset($email_options['text_color']) ? $email_options['text_color'] : '#333333';
+        
+        // Get header and footer
+        $header = isset($email_options['email_header']) ? $email_options['email_header'] : '';
+        $footer = isset($email_options['email_footer']) ? $email_options['email_footer'] : '';
+        
+        // Replace colors in header and footer
+        $header = str_replace('{primary_color}', $primary_color, $header);
+        $footer = str_replace('{primary_color}', $primary_color, $footer);
+        
+        // Accommodation name from CPT
+        $accommodation_name = get_the_title($accommodation_id);
+        
+        // Replace template variables
+        $template = str_replace('{customer_name}', $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(), $template);
+        $template = str_replace('{booking_id}', $order_id, $template);
+        $template = str_replace('{check_in_date}', $checkin, $template);
+        $template = str_replace('{check_out_date}', $checkout, $template);
+        $template = str_replace('{room_type}', $accommodation_name, $template);
+        
+        // Replace colors
+        $template = str_replace('{primary_color}', $primary_color, $template);
+        $template = str_replace('{secondary_color}', $secondary_color, $template);
+        $template = str_replace('{background_color}', $background_color, $template);
+        $template = str_replace('{text_color}', $text_color, $template);
+        
+        // Add header and footer
+        $template = str_replace('{email_header}', $header, $template);
+        $template = str_replace('{email_footer}', $footer, $template);
+        
+        // Email subject
+        $subject = sprintf(
+            __('Your booking has been cancelled: %s', 'text-domain'),
+            $accommodation_name
+        );
 
-            // Email subject & body
-            $subject = sprintf(
-                __('Your booking has been cancelled: %s', 'text-domain'),
-                $accommodation_name
-            );
+        // Headers (HTML email)
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>'
+        ];
 
-            $message  = '<h2>' . __('Booking Cancelled', 'text-domain') . '</h2>';
-            $message .= '<p>' . sprintf(__('We regret to inform you that your booking for <strong>%s</strong> has been cancelled.', 'text-domain'), $accommodation_name) . '</p>';
-            $message .= '<p><strong>' . __('Check-in:', 'text-domain') . '</strong> ' . esc_html($checkin) . '</p>';
-            $message .= '<p><strong>' . __('Check-out:', 'text-domain') . '</strong> ' . esc_html($checkout) . '</p>';
-            $message .= '<p>' . __('If you believe this was a mistake or need further assistance, please contact our support team.', 'text-domain') . '</p>';
-            $message .= '<p>' . get_bloginfo('name') . '</p>';
-
-            // Headers (HTML email)
-            $headers = [
-                'Content-Type: text/html; charset=UTF-8',
-                'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>'
-            ];
-
-            // Send the email
-            wp_mail($to, $subject, $message, $headers);
-        }
+        // Send the email
+        wp_mail($to, $subject, $template, $headers);
+    }
 
         
 
 
-    /**
-     * Send booking confirmation email
+   /**
+     * Send booking confirmation email using template from settings
      */
-    private function send_booking_email($to_email, $accommodation_id, $checkin, $checkout) {
+    private function send_booking_email($to_email, $accommodation_id, $checkin, $checkout,$order,$order_id) {
+        $email_options = get_option('nehabi_hotel_email_options');
+        
+        // Get template from settings or use default
+        $template = isset($email_options['confirmation_template']) ? 
+            $email_options['confirmation_template'] : 
+            $this->get_default_confirmation_template();
+        
+        // Get design settings
+        $primary_color = isset($email_options['primary_color']) ? $email_options['primary_color'] : '#3498db';
+        $secondary_color = isset($email_options['secondary_color']) ? $email_options['secondary_color'] : '#2ecc71';
+        $background_color = isset($email_options['background_color']) ? $email_options['background_color'] : '#f8f9fa';
+        $text_color = isset($email_options['text_color']) ? $email_options['text_color'] : '#333333';
+        
+        // Get header and footer
+        $header = isset($email_options['email_header']) ? $email_options['email_header'] : '';
+        $footer = isset($email_options['email_footer']) ? $email_options['email_footer'] : '';
+        
+        // Replace colors in header and footer
+        $header = str_replace('{primary_color}', $primary_color, $header);
+        $footer = str_replace('{primary_color}', $primary_color, $footer);
+        
+        // Accommodation name from CPT
+        $accommodation_name = get_the_title($accommodation_id);
+        
+        // Get order details
+         
+        $order = wc_get_order($order_id);
+        $customer_name = $order ? $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() : 'Customer';
+        $total_amount = $order ? $order->get_total() : '';
+        
+        // Replace template variables
+        $template = str_replace('{customer_name}', $customer_name, $template);
+        $template = str_replace('{booking_id}', $order_id, $template);
+        $template = str_replace('{check_in_date}', $checkin, $template);
+        $template = str_replace('{check_out_date}', $checkout, $template);
+        $template = str_replace('{room_type}', $accommodation_name, $template);
+        $template = str_replace('{total_amount}', $total_amount, $template);
+        
+        // Replace colors
+        $template = str_replace('{primary_color}', $primary_color, $template);
+        $template = str_replace('{secondary_color}', $secondary_color, $template);
+        $template = str_replace('{background_color}', $background_color, $template);
+        $template = str_replace('{text_color}', $text_color, $template);
+        
+        // Add header and footer
+        $template = str_replace('{email_header}', $header, $template);
+        $template = str_replace('{email_footer}', $footer, $template);
+        
+        // Email subject
         $subject = 'Your Accommodation Booking Confirmation';
-        $headers = ['Content-Type: text/html; charset=UTF-8'];
 
-        $message  = '<h2>Booking Confirmed!</h2>';
-        $message .= '<p>Thank you for booking <strong>' . get_the_title($accommodation_id) . '</strong>.</p>';
-        $message .= '<p><strong>Check-in:</strong> ' . esc_html($checkin) . '<br>';
-        $message .= '<strong>Check-out:</strong> ' . esc_html($checkout) . '</p>';
-        $message .= '<p>We look forward to hosting you!</p>';
+        // Headers (HTML email)
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>'
+        ];
 
-        wp_mail($to_email, $subject, $message, $headers);
+        // Send the email
+        wp_mail($to_email, $subject, $template, $headers);
+    }
+
+    public function send_expired_email($to, $accommodation_id, $checkin, $checkout, $order, $order_id) {
+    $email_options = get_option('nehabi_hotel_email_options');
+    
+    // Get template from settings or use default
+    $template = isset($email_options['expired_template']) ? 
+        $email_options['expired_template'] : 
+        $this->get_default_expired_template();
+    
+    // Get design settings
+    $primary_color = isset($email_options['primary_color']) ? $email_options['primary_color'] : '#3498db';
+    $secondary_color = isset($email_options['secondary_color']) ? $email_options['secondary_color'] : '#2ecc71';
+    $background_color = isset($email_options['background_color']) ? $email_options['background_color'] : '#f8f9fa';
+    $text_color = isset($email_options['text_color']) ? $email_options['text_color'] : '#333333';
+    
+    // Get header and footer
+    $header = isset($email_options['email_header']) ? $email_options['email_header'] : '';
+    $footer = isset($email_options['email_footer']) ? $email_options['email_footer'] : '';
+    
+    // Replace colors in header and footer
+    $header = str_replace('{primary_color}', $primary_color, $header);
+    $footer = str_replace('{primary_color}', $primary_color, $footer);
+    
+    // Accommodation name from CPT
+    $accommodation_name = get_the_title($accommodation_id);
+    
+    // Replace template variables
+    $template = str_replace('{customer_name}', $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(), $template);
+    $template = str_replace('{booking_id}', $order_id, $template);
+    $template = str_replace('{check_in_date}', $checkin, $template);
+    $template = str_replace('{check_out_date}', $checkout, $template);
+    $template = str_replace('{room_type}', $accommodation_name, $template);
+    
+    // Replace colors
+    $template = str_replace('{primary_color}', $primary_color, $template);
+    $template = str_replace('{secondary_color}', $secondary_color, $template);
+    $template = str_replace('{background_color}', $background_color, $template);
+    $template = str_replace('{text_color}', $text_color, $template);
+    
+    // Add header and footer
+    $template = str_replace('{email_header}', $header, $template);
+    $template = str_replace('{email_footer}', $footer, $template);
+    
+    // Email subject
+    $subject = sprintf(
+        __('Your booking has expired: %s', 'text-domain'),
+        $accommodation_name
+    );
+
+    // Headers (HTML email)
+    $headers = [
+        'Content-Type: text/html; charset=UTF-8',
+        'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>'
+    ];
+
+    // Send the email
+    wp_mail($to, $subject, $template, $headers);
+}
+
+/**
+ * Check for expired bookings and send notifications
+ * This should be hooked to a cron job or run periodically
+ */
+public function check_expired_bookings() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+    
+    // Get current date
+    $current_date = current_time('Y-m-d');
+    
+    // Find bookings where checkin date has passed and status is not completed/cancelled/expired
+    $expired_bookings = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM $table_name 
+             WHERE check_in < %s 
+             AND status NOT IN ('completed', 'cancelled', 'expired')",
+            $current_date
+        )
+    );
+    
+    foreach ($expired_bookings as $booking) {
+        // Update status to expired
+        $wpdb->update(
+            $table_name,
+            ['status' => 'expired'],
+            ['id' => $booking->id]
+        );
+        
+        // Get order details
+        $order = wc_get_order($booking->order_id);
+        
+        if ($order) {
+            // Send expired email notification
+            $this->send_expired_email(
+                $booking->customer_email,
+                $booking->accommodation_id,
+                $booking->check_in,
+                $booking->check_out,
+                $order,
+                $booking->order_id
+            );
+            
+            // Also update the associated CPT booking status
+            $booking_post_id = $booking->booking_id;
+            if ($booking_post_id && get_post_status($booking_post_id)) {
+                wp_update_post([
+                    'ID' => $booking_post_id,
+                    'post_status' => 'expired'
+                ]);
+                
+                update_post_meta($booking_post_id, 'booking_status', 'expired');
+            }
+            
+            // Restore available rooms
+            $accommodation_id = $booking->accommodation_id;
+            $total_rooms = (int) get_post_meta($accommodation_id, '_accommodation_count', true);
+            update_post_meta($accommodation_id, '_accommodation_count', $total_rooms + 1);
+            
+            // Mark as available if rooms are greater than 0
+            if ($total_rooms + 1 > 0) {
+                update_post_meta($accommodation_id, '_room_status', 'available');
+            }
+        }
+    }
+}
+
+/**
+ * Default expired template
+ */
+private function get_default_expired_template() {
+    return '<div style="background-color: {background_color}; padding: 20px; font-family: Arial, sans-serif; color: {text_color};">
+{email_header}
+<div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+    <h2 style="color: {primary_color};">Booking Expired</h2>
+    <p>Dear {customer_name},</p>
+    <p>We regret to inform you that your booking for <strong>{room_type}</strong> has expired.</p>
+    <p><strong>Booking ID:</strong> {booking_id}</p>
+    <p><strong>Check-in Date:</strong> {check_in_date}</p>
+    <p><strong>Check-out Date:</strong> {check_out_date}</p>
+    <p>Your booking was not confirmed within the required time frame, and the accommodation has been released for other guests.</p>
+    <p>If you would like to book again, please visit our website to check availability.</p>
+    <p>We apologize for any inconvenience this may have caused.</p>
+</div>
+{email_footer}
+</div>';
+}
+
+/**
+ * Setup cron job to check for expired bookings
+ */
+public function setup_expired_booking_cron() {
+    if (!wp_next_scheduled('nehabi_check_expired_bookings')) {
+        wp_schedule_event(time(), 'daily', 'nehabi_check_expired_bookings');
+    }
+    
+    add_action('nehabi_check_expired_bookings', [$this, 'check_expired_bookings']);
+}
+
+    /**
+     * Default cancellation template
+     */
+    private function get_default_cancellation_template() {
+                return '<div style="background-color: {background_color}; padding: 20px; font-family: Arial, sans-serif; color: {text_color};">
+            {email_header}
+            <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                <h2 style="color: {primary_color};">Booking Cancelled</h2>
+                <p>Dear {customer_name},</p>
+                <p>Your booking (ID: {booking_id}) has been cancelled.</p>
+                <p>If this was a mistake or you need further assistance, please contact us.</p>
+            </div>
+            {email_footer}
+        </div>';
+            }
+
+    /**
+     * Default confirmation template
+     */
+    private function get_default_confirmation_template() {
+        return '<div style="background-color: {background_color}; padding: 20px; font-family: Arial, sans-serif; color: {text_color};">
+    {email_header}
+    <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <h2 style="color: {primary_color};">Booking Confirmed!</h2>
+        <p>Dear {customer_name},</p>
+        <p>Your booking has been confirmed. Below are your booking details:</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Booking ID</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">{booking_id}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Check-in Date</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">{check_in_date}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Check-out Date</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">{check_out_date}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Room Type</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">{room_type}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Total Amount</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">{total_amount}</td>
+            </tr>
+        </table>
+        <p>We look forward to hosting you!</p>
+    </div>
+    {email_footer}
+</div>';
     }
 }
