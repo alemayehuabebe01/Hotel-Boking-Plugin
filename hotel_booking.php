@@ -109,6 +109,7 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             //export the data for csv and pdf accommodation.
             add_action('admin_init', array($this, 'booking_csv_download'));
             add_action('admin_init', array($this, 'booking_pdf_download'));
+             
           
         }
 

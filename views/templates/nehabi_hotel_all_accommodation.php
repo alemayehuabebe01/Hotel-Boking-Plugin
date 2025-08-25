@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-    <?php get_header(); ?>
+   
+    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +24,75 @@
             font-family: 'Poppins', sans-serif;
             color: var(--dark-text);
             background-color: #f9fafb;
-            padding-top: 20px;
+            padding-top: 0;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            height: 100vh;
+            min-height: 600px;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1800&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            color: white;
+            position: relative;
+            margin-bottom: 40px;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            padding: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+        
+        .hero-search {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+        }
+        
+        .search-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .btn-hero {
+            background: var(--accent-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            width: 100%;
+        }
+        
+        .btn-hero:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
         }
         
         .header {
@@ -257,6 +326,14 @@
             .room-img {
                 height: 220px;
             }
+            
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
         }
         
         @media (max-width: 768px) {
@@ -270,6 +347,19 @@
             
             .filter-section {
                 padding: 20px;
+            }
+            
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .hero-section {
+                min-height: 500px;
+                background-attachment: scroll;
             }
         }
         
@@ -292,77 +382,75 @@
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
         }
-
-        /* Full-width Hero */
-.header-hero {
-    width: 100%;
-    background-size: cover;
-    background-position: center;
-    height: 500px;
-    margin-bottom: 150px;
-    position: relative;
-}
-
-.header-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.header-content {
-    color: #fff;
-    z-index: 2;
-    padding: 0 20px;
-}
-
-.header-content .main-title {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-
-.header-content .subtitle {
-    font-size: 1.2rem;
-    color: #ddd;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .header-hero {
-        height: 45vh;
-    }
-    .header-content .main-title {
-        font-size: 2rem;
-    }
-    .header-content .subtitle {
-        font-size: 1rem;
-    }
-}
-
-
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) translateX(-50%);
+            }
+            40% {
+                transform: translateY(-20px) translateX(-50%);
+            }
+            60% {
+                transform: translateY(-10px) translateX(-50%);
+            }
+        }
     </style>
 </head>
 <body>
-
-   
-
-    <div class="container">
-    
-  
-        <header class="header-hero" style="background-image: url('https://images.unsplash.com/photo-1560185127-6ee5ef7383b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');">
-            <div class="header-overlay">
-                <div class="header-content text-center">
-                    <h1 class="main-title">Luxury Accommodations</h1>
-                    <p class="subtitle">Discover our exquisite collection of premium rooms and suites for your perfect stay</p>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Experience Unforgettable Luxury</h1>
+                <p class="hero-subtitle">Discover our exclusive collection of premium accommodations, designed for those who appreciate the finer things in life.</p>
+                
+                <div class="hero-search">
+                    <h3 class="search-title">Find Your Perfect Stay</h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Check-In</label>
+                            <input type="date" class="form-control">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Check-Out</label>
+                            <input type="date" class="form-control">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Guests</label>
+                            <select class="form-select">
+                                <option>1 Guest</option>
+                                <option>2 Guests</option>
+                                <option>3 Guests</option>
+                                <option>4+ Guests</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn-hero">Check Availability</button>
                 </div>
             </div>
+        </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">Luxury Accommodations</h1>
+            <p class="subtitle">Discover our exquisite collection of premium rooms and suites for your perfect stay</p>
         </header>
-    
         
-        <!-- <div class="filter-section">
+        <div class="filter-section">
             <h3 class="filter-title">Find Your Perfect Room</h3>
             <div class="row">
                 <div class="col-md-3">
@@ -424,7 +512,7 @@
             <div class="text-center mt-3">
                 <button class="filter-btn">Apply Filters</button>
             </div>
-        </div> -->
+        </div>
         
         <div class="d-flex justify-content-between align-items-center">
             <div class="results-count">Showing 12 accommodations</div>
@@ -744,8 +832,15 @@
                 }
             });
         }
+        
+        // Smooth scroll for the hero section indicator
+        document.querySelector('.scroll-indicator').addEventListener('click', function() {
+            window.scrollTo({
+                top: document.querySelector('.header').offsetTop,
+                behavior: 'smooth'
+            });
+        });
     </script>
-
-    <?php get_footer(); ?>
 </body>
+ 
 </html>
