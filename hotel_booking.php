@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;  
 }
 
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
 
@@ -32,7 +34,8 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
 
             // require_once dirname( __FILE__ ) . '/inc/class-tgm-plugin-activation.php';
             // require_once dirname( __FILE__ ) . '/inc/required-plugins.php';
-
+ 
+            require_once (Nehabi_Hotel_Booking_PATH . 'lips/vendor/autoload.php');
             require_once( Nehabi_Hotel_Booking_PATH . 'app/post/class.nehabi-hotel-booking-cpt.php' );
             $Nehabi_Hotel_Booking = New Nehabi_Hotel_CPT();
  
@@ -103,8 +106,121 @@ if( !class_exists( 'Nehabi_Hotel_Booking' ) ){
             add_action( 'woocommerce_checkout_update_order_meta', array($this,'wishu_save_custom_checkout_fields_to_order') );
             register_activation_hook( __FILE__, array($this,'wishu_create_payment_table') );
             
-
+            //export the data for csv and pdf accommodation.
+            add_action('admin_init', array($this, 'booking_csv_download'));
+            add_action('admin_init', array($this, 'booking_pdf_download'));
           
+        }
+
+        //handle the csv download functions
+    
+      public function booking_csv_download() {
+                if (isset($_GET['export_csv']) && $_GET['page'] === 'accommodation-report') {
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+                    $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+                    if ($results) {
+                        $date = date('Y-m-d'); // e.g. 2025-08-25
+                        header('Content-Type: text/csv; charset=utf-8');
+                        header('Content-Disposition: attachment; filename=booking_report_' . $date . '.csv');
+                        
+                        $output = fopen('php://output', 'w');
+                        fputcsv($output, array_keys($results[0])); // headers
+                        foreach ($results as $row) {
+                            fputcsv($output, $row);
+                        }
+                        fclose($output);
+                        exit;
+                    }
+                }
+            }
+
+        //handle the pdf downlaod functions 
+      public function booking_pdf_download() {
+            if (isset($_GET['export_pdf']) && $_GET['page'] === 'accommodation-report') {
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+                $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+                if ($results) {
+                    $date = date('Y-m-d');
+
+                    // Setup Dompdf
+                    $options = new Options();
+                    $options->set('isRemoteEnabled', true);
+                    $dompdf = new Dompdf($options);
+
+                    // Build the HTML
+                    ob_start();
+                    ?>
+                    <html>
+                    <head>
+                        <style>
+                            body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #333; }
+                            .header { text-align: center; border-bottom: 2px solid #2271b1; padding-bottom: 10px; margin-bottom: 20px; }
+                            .header img { height: 50px; margin-bottom: 10px; }
+                            .title { font-size: 18px; font-weight: bold; color: #2271b1; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+                            th { background-color: #f0f6fc; }
+                            .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 10px; color: #777; border-top: 1px solid #ddd; padding: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                           <?php 
+                                $logo_id = get_theme_mod('custom_logo'); 
+                                $logo_url = wp_get_attachment_image_url($logo_id , 'full'); 
+                            ?>
+                            <?php if ($logo_url): ?>
+                                <img src="<?php echo esc_url($logo_url); ?>" alt="Logo">
+                            <?php else: ?>
+                                <h2><?php bloginfo('name'); ?></h2> <!-- fallback if no logo -->
+                            <?php endif; ?>
+                            <div class="title">Booking Analytics Report</div>
+                            <div>Date: <?php echo $date; ?></div>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <?php foreach (array_keys($results[0]) as $col) : ?>
+                                        <?php if (!in_array($col, ['order_id', 'accommodation_id'])): ?>
+                                            <th><?php echo ucfirst(str_replace('_', ' ', $col)); ?></th>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($results as $row) : ?>
+                                    <tr>
+                                        <?php foreach ($row as $key => $cell) : ?>
+                                            <?php if (!in_array($key, ['order_id', 'accommodation_id'])): ?>
+                                                <td><?php echo esc_html($cell); ?></td>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+
+                        <div class="footer">
+                            © <?php echo date('Y'); ?> <?php bloginfo('name'); ?> — <?php bloginfo('description'); ?> | <?php echo home_url(); ?>
+                        </div>
+                    </body>
+                    </html>
+                    <?php
+                    $html = ob_get_clean();
+
+                    $dompdf->loadHtml($html);
+                    $dompdf->setPaper('A4', 'landscape'); // or portrait
+                    $dompdf->render();
+
+                    $dompdf->stream("booking_report_$date.pdf", ["Attachment" => true]);
+                    exit;
+                }
+            }
         }
 
       public function wishu_create_payment_table() {

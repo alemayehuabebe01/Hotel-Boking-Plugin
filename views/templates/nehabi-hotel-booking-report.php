@@ -345,13 +345,42 @@
     </style>
 </head>
 <body>
+
+    <?php
+        if (isset($_GET['export_csv'])) {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'wishu_nehabi_hotel_payments';
+
+            $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+            if ($results) {
+                header('Content-Type: text/csv; charset=utf-8');
+                header('Content-Disposition: attachment; filename=booking_report.csv');
+                $output = fopen('php://output', 'w');
+
+                // Add CSV headers
+                fputcsv($output, array_keys($results[0]));
+
+                // Add rows
+                foreach ($results as $row) {
+                    fputcsv($output, $row);
+                }
+
+                fclose($output);
+                exit;
+            }
+        }
+        ?>
     <div class="wrap">
         <h1 class="wp-heading-inline">
             <i class="fas fa-chart-bar"></i> Booking Analytics
         </h1>
-        <a href="#" class="page-title-action">
-            <i class="fas fa-file-export"></i> Export CSV
-        </a>
+            <a href="<?php echo admin_url('admin.php?page=accommodation-report&export_csv=1'); ?>" class="page-title-action">
+                <i class="fas fa-file-export"></i> Export CSV
+            </a>
+            <a href="<?php echo admin_url('admin.php?page=accommodation-report&export_pdf=1'); ?>" class="page-title-action">
+                <i class="fas fa-file-pdf"></i> Export PDF
+            </a>
         <hr class="wp-header-end">
 
         <!-- KPI Cards -->

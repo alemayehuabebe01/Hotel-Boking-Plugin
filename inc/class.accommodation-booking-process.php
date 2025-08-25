@@ -255,7 +255,7 @@ class Nehabi_Hotel_Accommodation_Booking_Proccess {
                         update_post_meta($accommodation_id, '_room_status', 'available');
                     }
 
-                    // ✅ Update ALL rows for this order in custom table
+                    //Update ALL rows for this order in custom table
                     $sql = $wpdb->prepare(
                         "UPDATE $table_name
                         SET status = %s,

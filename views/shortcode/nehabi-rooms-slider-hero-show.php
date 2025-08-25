@@ -136,42 +136,59 @@
 
   <!-- Unique HERO SLIDER -->
   <div class="villa-hero-slider swiper">
-    <div class="swiper-wrapper">
+  <div class="swiper-wrapper">
 
-      <!-- Slide 1 -->
-      <div class="swiper-slide" style="background-image: url('https://picsum.photos/id/1016/1600/900');">
-        <div class="villa-hero-content">
-          <h1>Escape to Paradise</h1>
-          <p>Luxury villas in Italy’s most beautiful regions.</p>
-          <a href="#villas" class="villa-hero-btn">Explore Villas</a>
+    <?php
+    $args = array(
+      'post_type'      => 'accommodation',
+      'posts_per_page' => 5,
+      'post_status'    => 'publish'
+    );
+    $rooms = new WP_Query($args);
+
+    if ($rooms->have_posts()) :
+      while ($rooms->have_posts()) : $rooms->the_post();
+        $bg       = get_the_post_thumbnail_url(get_the_ID(), 'full');
+        $price    = get_post_meta(get_the_ID(), '_accommodation_price', true); // custom field key: room_price
+        $location = get_post_meta(get_the_ID(), 'room_location', true); // custom field key: room_location
+        ?>
+        
+        <div class="swiper-slide" style="background-image: url('<?php echo esc_url($bg); ?>');">
+          <div class="villa-hero-content">
+            
+            <h2 style="color:white;"><?php the_title(); ?></h2>
+            
+            <?php if ($location): ?>
+              <p><strong>📍 <?php echo esc_html($location); ?></strong></p>
+            <?php endif; ?>
+            
+            <?php if ($price): ?>
+              <p><strong>💰 <?php echo esc_html($price); ?></strong></p>
+            <?php endif; ?>
+
+            <!-- <p><?php echo wp_trim_words(get_the_excerpt(), 20); ?></p> -->
+
+            <a href="<?php the_permalink(); ?>" class="villa-hero-btn">View Details</a>
+          </div>
         </div>
+        
+        <?php
+      endwhile;
+      wp_reset_postdata();
+    else :
+      ?>
+      <div class="swiper-slide" style="background:#333;display:flex;align-items:center;justify-content:center;color:#fff;">
+        <h2>No rooms available.</h2>
       </div>
+    <?php endif; ?>
 
-      <!-- Slide 2 -->
-      <div class="swiper-slide" style="background-image: url('https://picsum.photos/id/1015/1600/900');">
-        <div class="villa-hero-content">
-          <h1>Wake Up to Beauty</h1>
-          <p>Mountain views, wine, and unforgettable stays.</p>
-          <a href="#villas" class="villa-hero-btn">View Locations</a>
-        </div>
-      </div>
-
-      <!-- Slide 3 -->
-      <div class="swiper-slide" style="background-image: url('https://picsum.photos/id/1020/1600/900');">
-        <div class="villa-hero-content">
-          <h1>Your Private Getaway</h1>
-          <p>Peace. Privacy. Pool included.</p>
-          <a href="#villas" class="villa-hero-btn">Book Now</a>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Custom Navigation -->
-    <div class="villa-hero-prev swiper-button-prev"></div>
-    <div class="villa-hero-next swiper-button-next"></div>
-    <div class="villa-hero-pagination swiper-pagination"></div>
   </div>
+
+  <!-- Navigation -->
+  <div class="villa-hero-prev swiper-button-prev"></div>
+  <div class="villa-hero-next swiper-button-next"></div>
+  <div class="villa-hero-pagination swiper-pagination"></div>
+</div>
 
   <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
