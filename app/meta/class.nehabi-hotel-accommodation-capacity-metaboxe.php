@@ -13,8 +13,60 @@
             add_action( 'save_post', array( $this , 'nehabi_accommodation_capacity_metaboxes_save' ) );
             add_action( 'manage_accommodation_posts_columns', array( $this, 'add_columns' ) );
             add_filter('manage_accommodation_posts_custom_column', array($this, 'output_column_content'),10,2 );
-     
+            add_action('restrict_manage_posts',array($this,'add_dropdown_on_admin_cpt_table_for_fielter'));
+            add_action('parse_query',array($this,'dropdown_fielter_process') );
           }
+
+        public function dropdown_fielter_process($query) {
+                global $pagenow, $typenow;
+
+                if ($pagenow !== 'edit.php' || $typenow !== 'accommodation') {
+                    return;
+                }
+
+                $taxonomies = ['accommodation_amenity', 'accommodation_category'];
+
+                foreach ($taxonomies as $taxonomy) {
+                    if (!empty($_GET[$taxonomy]) && is_numeric($_GET[$taxonomy])) {
+                        $term = get_term_by('id', $_GET[$taxonomy], $taxonomy);
+                        if ($term) {
+                            $query->query_vars[$taxonomy] = $term->slug;
+                        }
+                    }
+                }
+            }
+
+        public function add_dropdown_on_admin_cpt_table_for_fielter() {
+                global $typenow;
+
+                // Only on your CPT
+                if ($typenow !== 'accommodation') {
+                    return;
+                }
+
+                // List of taxonomies to filter by
+                $taxonomies = [
+                    'accommodation_amenity'   => __('Amenities', 'accommodation'),
+                    'accommodation_category'  => __('Categories', 'accommodation'),
+                ];
+
+                foreach ($taxonomies as $taxonomy => $label) {
+                    $selected = $_GET[$taxonomy] ?? '';
+                    $info_taxonomy = get_taxonomy($taxonomy);
+
+                    wp_dropdown_categories([
+                        'show_option_all' => sprintf(__('All %s', 'accommodation'), $info_taxonomy->label),
+                        'taxonomy'        => $taxonomy,
+                        'name'            => $taxonomy,
+                        'orderby'         => 'name',
+                        'selected'        => $selected,
+                        'hierarchical'    => true,
+                        'depth'           => 3,
+                        'show_count'      => true,
+                        'hide_empty'      => false,
+                    ]);
+                }
+            }
 
 
         public function nehabi_accommodation_capacity_metaboxes(){
@@ -205,7 +257,9 @@
               
               //unset($columns['subscription_price']);
          
-                
+            $columns = [
+                'cb' => '<input type="checkbox" />', // ✅ restore bulk action checkbox
+            ];
             $columns['title'] = __('Title', 'accommodation');
             $columns['taxonomy-accommodation_category'] = __('Accommodation Categories', 'accommodation');
             $columns['taxonomy-accommodation_tag'] = __('Accommodation Tags', 'accommodation');

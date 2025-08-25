@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-   
     
 <head>
     <meta charset="UTF-8">
@@ -25,21 +24,29 @@
             color: var(--dark-text);
             background-color: #f9fafb;
             padding-top: 0;
+            margin: 0;
         }
         
-        /* Hero Section */
+        /* Hero Section - Full Width */
         .hero-section {
-            height: 100vh;
+            height: 80vh;
             min-height: 600px;
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1800&q=80');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
             display: flex;
             align-items: center;
             color: white;
             position: relative;
             margin-bottom: 40px;
+        }
+        
+        /* Container override for Astra compatibility */
+        .ast-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
         }
         
         .hero-content {
@@ -359,7 +366,11 @@
             
             .hero-section {
                 min-height: 500px;
-                background-attachment: scroll;
+                height: 70vh;
+            }
+            
+            .ast-container {
+                padding: 0 15px;
             }
         }
         
@@ -404,12 +415,41 @@
                 transform: translateY(-10px) translateX(-50%);
             }
         }
+        
+        /* WordPress Integration Helpers */
+        .wp-integration {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .wp-integration h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .code-snippet {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        /* Astra-specific adjustments */
+        .ast-container::before, .ast-container::after {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <!-- Hero Section -->
+    <!-- Hero Section - Full Width -->
     <section class="hero-section">
-        <div class="container">
+        <div class="ast-container">
             <div class="hero-content">
                 <h1 class="hero-title">Experience Unforgettable Luxury</h1>
                 <p class="hero-subtitle">Discover our exclusive collection of premium accommodations, designed for those who appreciate the finer things in life.</p>
@@ -444,7 +484,36 @@
         </div>
     </section>
 
-    <div class="container">
+    <div class="ast-container">
+        <!-- WordPress Integration Help Section -->
+        <div class="wp-integration">
+            <h3>WordPress Integration</h3>
+            <p>To integrate this with your WordPress site using the Astra theme, place this code in your template file between <code>get_header()</code> and <code>get_footer()</code> calls.</p>
+            <p>Replace the static room data with a WordPress loop that queries your accommodation CPT.</p>
+            
+            <div class="code-snippet">
+                // Example WordPress loop for accommodation CPT<br>
+                &lt;?php<br>
+                $args = array(<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;'post_type' =&gt; 'accommodation',<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;'posts_per_page' =&gt; 8<br>
+                );<br>
+                $accommodations = new WP_Query($args);<br>
+                <br>
+                if ($accommodations-&gt;have_posts()) :<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;while ($accommodations-&gt;have_posts()) : $accommodations-&gt;the_post();<br>
+                ?&gt;<br>
+                <br>
+                &lt;!-- Room card template --&gt;<br>
+                <br>
+                &lt;?php<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;endwhile;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;wp_reset_postdata();<br>
+                endif;<br>
+                ?&gt;
+            </div>
+        </div>
+
         <header class="header">
             <h1 class="main-title">Luxury Accommodations</h1>
             <p class="subtitle">Discover our exquisite collection of premium rooms and suites for your perfect stay</p>
@@ -515,7 +584,7 @@
         </div>
         
         <div class="d-flex justify-content-between align-items-center">
-            <div class="results-count">Showing 12 accommodations</div>
+            <div class="results-count">Showing 8 accommodations</div>
             <div class="view-options">
                 <button class="view-btn active"><i class="fas fa-th"></i> Grid</button>
                 <button class="view-btn"><i class="fas fa-list"></i> List</button>
@@ -842,5 +911,5 @@
         });
     </script>
 </body>
- 
+
 </html>
