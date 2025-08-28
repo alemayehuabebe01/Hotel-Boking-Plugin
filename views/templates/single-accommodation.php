@@ -289,7 +289,7 @@ get_header();
 
                     
                     <!-- Reviews -->
-                    <div class="card border-0 shadow-sm">
+                    <!-- <div class="card border-0 shadow-sm">
                         <div class="card-body p-4">
                             <h3 class="mb-4">Guest Reviews</h3>
                             <div class="mb-4">
@@ -353,7 +353,7 @@ get_header();
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
               

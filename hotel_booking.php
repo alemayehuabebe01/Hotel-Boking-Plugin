@@ -3,7 +3,7 @@
 /**
 * Plugin Name: Hotel Booking
 * Plugin URI: https://nehabi.com/
-* Description: Best Plugin To process the reserving accommodation in advance—typically a room in a hotel, resort, or guesthouse. 
+* Description: Best Plugin To process the reserving rooms in advance—typically a room in a hotel, resort, or guesthouse. 
 * Version: 1.0
 * Requires at least: 5.0
 * Requires PHP: 7.5

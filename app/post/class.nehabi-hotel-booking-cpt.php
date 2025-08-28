@@ -15,8 +15,26 @@ if ( ! class_exists( 'Nehabi_Hotel_CPT' ) ) {
             add_action( 'admin_head', array( $this, 'hb_hide_add_new_button' ) );
             add_action( 'wp_ajax_change_order_status', array( $this, 'hb_ajax_change_order_status' ) );
             add_action( 'admin_enqueue_scripts', array( $this, 'hb_enqueue_order_status_script' ) );
+            add_filter('post_row_actions', array($this,'remove_cpt_row_actions'), 10, 2);
+            add_filter('bulk_actions-edit-nehabi-hotel-booking', function($bulk_actions) {
+                if (isset($bulk_actions['edit'])) {
+                    unset($bulk_actions['edit']); // Remove the "Edit" bulk action
+                }
+                return $bulk_actions;
+            });
 		}
 
+
+       public function remove_cpt_row_actions($actions, $post) {
+            // Replace 'your_cpt_slug' with your CPT's slug
+            if ($post->post_type == 'nehabi-hotel-booking') {
+                // Remove unwanted actions
+                unset($actions['edit']);       // Edit
+                unset($actions['view']);       // View
+                unset($actions['inline hide-if-no-js']); // Quick Edit
+            }
+            return $actions;
+        }
         public function hb_remove_add_new_submenu() {
             remove_submenu_page( 'edit.php?post_type=nehabi-hotel-booking', 'post-new.php?post_type=nehabi-hotel-booking' );
         }
@@ -68,7 +86,7 @@ if ( ! class_exists( 'Nehabi_Hotel_CPT' ) ) {
 
        public function wishu_booking_custom_columns( $columns ) {
 				unset( $columns['date'] );
-				$columns['status']          = 'Status';
+				$columns['status']          = 'Payment Status';
 				$columns['check_dates']     = 'Check-in / Check-out';
 				$columns['customer_info']   = 'Customer Info';
 				$columns['price']           = 'Price';
