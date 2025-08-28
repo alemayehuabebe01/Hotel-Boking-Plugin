@@ -163,7 +163,7 @@ get_header();
                 <div class="p-4 p-lg-5 w-100">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
-                            <h1 class="fw-bold mb-2"><?php the_title(); ?></h1>
+                            <h2 class="fw-bold mb-2"><?php the_title(); ?></h2>
                             <div class="d-flex align-items-center mb-3">
                                 <div class="text-warning me-2">
                                     <?php for ($i = 0; $i < 5; $i++): ?>
@@ -363,32 +363,32 @@ get_header();
 
                <!-- check the availablity of the room -->
 
-              <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <h3 class="mb-4 text-center">Check Availability</h3>
+             <!-- <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="mb-4 text-center">Check Availability</h3>
 
-                    <form id="availability-check-form">
-                        <input type="hidden" name="action" value="check_accommodation_availability">
-                        <input type="hidden" name="accommodation_id" value="<?php echo esc_attr(get_the_ID()); ?>">
+                        <form id="availability-check-form">
+                            <input type="hidden" name="action" value="check_accommodation_availability">
+                            <input type="hidden" name="accommodation_id" value="<?php echo esc_attr(get_the_ID()); ?>">
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Check-in</label>
-                            <input type="date" name="checkin" class="form-control" required>
-                        </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Check-in</label>
+                                <input type="date" name="checkin" class="form-control" required>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Check-out</label>
-                            <input type="date" name="checkout" class="form-control" required>
-                        </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Check-out</label>
+                                <input type="date" name="checkout" class="form-control" required>
+                            </div>
 
-                        <button type="submit" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-search"></i> Check Availability
-                        </button>
-                    </form>
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-search"></i> Check Availability
+                            </button>
+                        </form>
 
-                    <div id="availability-result" class="mt-3"></div>
-                </div>
-            </div>
+                        <div id="availability-result" class="mt-3"></div>
+                    </div>
+                </div> -->
 
 
 
@@ -550,7 +550,10 @@ get_header();
             <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold">You may also like</h2>
-                    <a href="#" class="btn btn-outline-primary">View All</a>
+                   <a href="<?php echo get_permalink( get_page_by_path('rooms') ); ?>" 
+                        class="btn btn-outline-primary">
+                        View All
+                    </a>
                 </div>
                 
                 <div class="row g-4">
@@ -572,7 +575,7 @@ get_header();
                                     <img src="<?php the_post_thumbnail_url('large'); ?>" class="card-img-top" style="height: 220px; object-fit: cover;" alt="<?php the_title(); ?>">
                                 <?php endif; ?>
                                 <span class="badge bg-primary position-absolute top-0 end-0 m-3">
-                                    <?php echo esc_html(get_post_meta(get_the_ID(), 'accommodation_type', true)); ?>
+                                    <?php echo esc_html(get_post_meta(get_the_ID(), '_room_status', true)); ?>
                                 </span>
                             </div>
                             <div class="card-body">
@@ -587,7 +590,7 @@ get_header();
                                 <p class="text-muted mb-3"><?php echo wp_trim_words(get_the_excerpt(), 15); ?></p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="text-primary mb-0">
-                                        <?php echo esc_html(get_post_meta(get_the_ID(), 'price', true)); ?> ETB 
+                                        <?php echo esc_html(get_post_meta(get_the_ID(), '_accommodation_price', true)); ?> ETB 
                                         <small class="text-muted fs-6">/ night</small>
                                     </h5>
                                     <a href="<?php the_permalink(); ?>" class="btn btn-sm btn-outline-primary">View Details</a>
@@ -640,14 +643,10 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 jQuery(function($){
-    // Convert PHP booked dates to JavaScript array
-    var disabledDates = <?php echo json_encode($booked_dates); ?>;
-    
     // Initialize Flatpickr for check-in
     var checkinPicker = flatpickr("#checkin", {
         dateFormat: "Y-m-d",
         minDate: "today",
-        disable: disabledDates, // This disables the booked dates
         onChange: function(selectedDates, dateStr, instance) {
             if (selectedDates.length > 0) {
                 // Set checkout min date to check-in + 1 day
@@ -661,16 +660,6 @@ jQuery(function($){
                 if (checkoutPicker.selectedDates[0] && checkoutPicker.selectedDates[0] <= minCheckoutDate) {
                     checkoutPicker.clear();
                 }
-                
-                calculateTotal();
-            }
-        },
-        onDayCreate: function(dObj, dStr, fp, dayElem) {
-            // Optional: Add visual styling to booked dates
-            var dateStr = dayElem.dateObj.toISOString().split('T')[0];
-            if (disabledDates.includes(dateStr)) {
-                dayElem.classList.add('booked');
-                dayElem.title = "Already booked";
             }
         }
     });
@@ -678,22 +667,8 @@ jQuery(function($){
     // Initialize Flatpickr for checkout
     var checkoutPicker = flatpickr("#checkout", {
         dateFormat: "Y-m-d",
-        minDate: new Date().fp_incr(1),
-        disable: disabledDates, // This disables the booked dates
-        onChange: function(selectedDates, dateStr, instance) {
-            calculateTotal();
-        },
-        onDayCreate: function(dObj, dStr, fp, dayElem) {
-            // Optional: Add visual styling to booked dates
-            var dateStr = dayElem.dateObj.toISOString().split('T')[0];
-            if (disabledDates.includes(dateStr)) {
-                dayElem.classList.add('booked');
-                dayElem.title = "Already booked";
-            }
-        }
+        minDate: new Date().fp_incr(1)
     });
-
-     
 });
 </script>
 

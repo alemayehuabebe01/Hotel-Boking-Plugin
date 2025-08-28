@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +26,24 @@
             margin: 0;
         }
         
+        /* Override Astra theme styles that might conflict */
+        .site-content #primary {
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+        }
+        
+        .ast-container {
+            max-width: 1200px !important;
+            padding: 0 20px !important;
+            width: 100% !important;
+        }
+        
+        /* Hide default page header if needed */
+        .entry-header {
+            display: none;
+        }
+        
         /* Hero Section - Full Width */
         .hero-section {
             height: 80vh;
@@ -41,18 +58,10 @@
             margin-bottom: 40px;
         }
         
-        /* Container override for Astra compatibility */
-        .ast-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            width: 100%;
-        }
-        
         .hero-content {
             max-width: 800px;
             padding: 30px;
-            position: relative;
+            position: center;
             z-index: 2;
         }
         
@@ -61,6 +70,7 @@
             font-size: 3.5rem;
             font-weight: 700;
             margin-bottom: 20px;
+            margin-top: 80px;
             line-height: 1.2;
         }
         
@@ -69,6 +79,7 @@
             margin-bottom: 30px;
             font-weight: 300;
             line-height: 1.6;
+            color: white;
         }
         
         .hero-search {
@@ -102,16 +113,18 @@
             transform: translateY(-2px);
         }
         
-        .header {
+        .custom_header {
             text-align: center;
             margin-bottom: 40px;
+            margin-top:200px;
             padding: 20px;
         }
         
         .main-title {
             font-family: 'Playfair Display', serif;
             font-weight: 700;
-            color: var(--primary-color);
+            font-size: 50px;
+            color : white;
             margin-bottom: 15px;
         }
         
@@ -120,6 +133,7 @@
             max-width: 600px;
             margin: 0 auto;
             font-size: 1.1rem;
+            color:white;
         }
         
         .filter-section {
@@ -213,7 +227,7 @@
         
         .room-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
+            font-size: 1rem;
             font-weight: 600;
             margin-bottom: 12px;
             color: var(--primary-color);
@@ -370,7 +384,7 @@
             }
             
             .ast-container {
-                padding: 0 15px;
+                padding: 0 15px !important;
             }
         }
         
@@ -444,18 +458,55 @@
         .ast-container::before, .ast-container::after {
             display: none;
         }
+        
+        /* Fix for Astra theme's default content wrapper */
+        #primary {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
     </style>
+    <?php wp_head(); ?>
 </head>
-<body>
+<body <?php body_class(); ?>>
+<?php 
+// Astra theme hook before header
+if (function_exists('astra_header_before')) {
+    astra_header_before();
+}
+?>
+
+<?php 
+// Astra theme header
+if (function_exists('astra_header')) {
+    astra_header();
+}
+?>
+
+<?php 
+// Astra theme hook after header
+if (function_exists('astra_header_after')) {
+    astra_header_after();
+}
+?>
+
     <!-- Hero Section - Full Width -->
     <section class="hero-section">
         <div class="ast-container">
+
+          <header class="custom_header">
+            <h1 class="main-title">Luxury Rooms</h1>
+            <p class="subtitle">Discover our exquisite collection of premium rooms and suites for your perfect stay</p>
+        </header>
+
+
             <div class="hero-content">
-                <h1 class="hero-title">Experience Unforgettable Luxury</h1>
-                <p class="hero-subtitle">Discover our exclusive collection of premium accommodations, designed for those who appreciate the finer things in life.</p>
+                <h1 class="hero-title"> </h1>
+                <p class="hero-subtitle"> </p>
+
+               
                 
-                <div class="hero-search">
-                    <h3 class="search-title">Find Your Perfect Stay</h3>
+                <!-- <div class="hero-search">
+                    <h3 class="search-title"> </h3>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Check-In</label>
@@ -476,7 +527,7 @@
                         </div>
                     </div>
                     <button class="btn-hero">Check Availability</button>
-                </div>
+                </div> -->
             </div>
         </div>
         <div class="scroll-indicator">
@@ -485,41 +536,12 @@
     </section>
 
     <div class="ast-container">
-        <!-- WordPress Integration Help Section -->
-        <div class="wp-integration">
-            <h3>WordPress Integration</h3>
-            <p>To integrate this with your WordPress site using the Astra theme, place this code in your template file between <code>get_header()</code> and <code>get_footer()</code> calls.</p>
-            <p>Replace the static room data with a WordPress loop that queries your accommodation CPT.</p>
-            
-            <div class="code-snippet">
-                // Example WordPress loop for accommodation CPT<br>
-                &lt;?php<br>
-                $args = array(<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;'post_type' =&gt; 'accommodation',<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;'posts_per_page' =&gt; 8<br>
-                );<br>
-                $accommodations = new WP_Query($args);<br>
-                <br>
-                if ($accommodations-&gt;have_posts()) :<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;while ($accommodations-&gt;have_posts()) : $accommodations-&gt;the_post();<br>
-                ?&gt;<br>
-                <br>
-                &lt;!-- Room card template --&gt;<br>
-                <br>
-                &lt;?php<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;endwhile;<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;wp_reset_postdata();<br>
-                endif;<br>
-                ?&gt;
-            </div>
-        </div>
-
-        <header class="header">
-            <h1 class="main-title">Luxury Accommodations</h1>
-            <p class="subtitle">Discover our exquisite collection of premium rooms and suites for your perfect stay</p>
-        </header>
+        <!-- <header class="header">
+             <h1 class="main-title">Luxury Rooms</h1>
+            <p class="subtitle">Discover our exquisite collection of premium rooms and suites for your perfect stay</p> 
+        </header> -->
         
-        <div class="filter-section">
+        <!-- <div class="filter-section">
             <h3 class="filter-title">Find Your Perfect Room</h3>
             <div class="row">
                 <div class="col-md-3">
@@ -581,295 +603,137 @@
             <div class="text-center mt-3">
                 <button class="filter-btn">Apply Filters</button>
             </div>
-        </div>
+        </div> -->
         
         <div class="d-flex justify-content-between align-items-center">
-            <div class="results-count">Showing 8 accommodations</div>
+            <div class="results-count">Showing 8 rooms</div>
             <div class="view-options">
                 <button class="view-btn active"><i class="fas fa-th"></i> Grid</button>
-                <button class="view-btn"><i class="fas fa-list"></i> List</button>
+                <!-- <button class="view-btn"><i class="fas fa-list"></i> List</button> -->
             </div>
         </div>
         
+        <?php
+
+        // WP Query for Accommodations
+        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+        $args = array(
+            'post_type'      => 'accommodation',
+            'posts_per_page' => 4,  
+            'paged'          => $paged
+        );
+        $accommodations = new WP_Query($args);
+        ?>
+
         <div class="room-grid">
             <div class="row">
-                <!-- Room 1 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Luxury Suite">
-                            <div class="room-badge">Popular</div>
-                            <div class="room-price">$199/night</div>
+                <?php if ($accommodations->have_posts()) : ?>
+                    <?php while ($accommodations->have_posts()) : $accommodations->the_post(); ?>
+                        <?php
+                        // Get meta values
+                        $badge     = get_post_meta(get_the_ID(), '_room_status', true);
+                        $price     = get_post_meta(get_the_ID(), '_accommodation_price', true);
+                        $room_type = get_post_meta(get_the_ID(), 'room_type', true);
+                        $room_size = get_post_meta(get_the_ID(), '_accommodation_size', true);
+                        //$rating    = get_post_meta(get_the_ID(), 'rating', true);
+                        $guests    = get_post_meta(get_the_ID(), '_accommodation_capacity', true);
+                        $beds      = get_post_meta(get_the_ID(), '_accommodation_children', true);
+                        $baths     = get_post_meta(get_the_ID(), 'baths', true);
+                        ?>
+                        
+                        <div class="col-xl-3 col-lg-4 col-md-6">
+                            <div class="room-card">
+                                <div class="room-img">
+                                    <?php if (has_post_thumbnail()) : ?>
+                                        <?php the_post_thumbnail('medium', ['class' => 'img-fluid']); ?>
+                                    <?php else : ?>
+                                        <img src="https://via.placeholder.com/600x400" alt="<?php the_title(); ?>">
+                                    <?php endif; ?>
+
+                                    <?php if ($badge) : ?>
+                                        <div class="room-badge"><?php echo esc_html($badge); ?></div>
+                                    <?php endif; ?>
+
+                                    <?php if ($price) : ?>
+                                        <div class="room-price">$<?php echo esc_html($price); ?>/night</div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="room-details">
+                                    <h4 class="room-title"><?php the_title(); ?></h4>
+                                    
+                                    <div class="room-meta">
+                                        <?php if ($room_type) : ?>
+                                            <span class="room-type"><?php echo esc_html($room_type); ?></span>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($room_size) : ?>
+                                            <span class="room-size"><?php echo esc_html($room_size); ?> m²</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                     
+                                    <div class="room-features">
+                                        <?php if ($guests) : ?>
+                                            <span><i class="fas fa-user-friends"></i> <?php echo esc_html($guests); ?> Guests</span>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($beds) : ?>
+                                            <span><i class="fas fa-child"></i> <?php echo esc_html($beds); ?></span>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($baths) : ?>
+                                            <span><i class="fas fa-bath"></i> <?php echo esc_html($baths); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <p class="room-description"><?php echo wp_trim_words( get_the_excerpt(), 15, '...' ); ?></p>
+                                    <a href="<?php the_permalink(); ?>" class="btn-book">
+                                        <i class="fas fa-calendar-check"></i> Book Now
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Luxury Suite</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Suite</span>
-                                <span class="room-size">45 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(4.5)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 2 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 1 King Bed</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 1 Bath</span>
-                            </div>
-                            <p class="room-description">Spacious suite with panoramic views, premium amenities, and a luxurious bathroom with jacuzzi.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Room 2 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Deluxe Room">
-                            <div class="room-price">$149/night</div>
-                        </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Deluxe Room</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Standard</span>
-                                <span class="room-size">32 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.0)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 2 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 1 Queen Bed</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 1 Bath</span>
-                            </div>
-                            <p class="room-description">Comfortable and elegantly designed room with modern amenities and a relaxing atmosphere.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Room 3 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Family Room">
-                            <div class="room-badge">Family</div>
-                            <div class="room-price">$249/night</div>
-                        </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Family Room</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Family</span>
-                                <span class="room-size">60 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span>(4.8)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 4 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 2 Queen Beds</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 2 Baths</span>
-                            </div>
-                            <p class="room-description">Perfect for families, featuring separate sleeping areas and extra space for relaxation.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Room 4 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Executive Suite">
-                            <div class="room-badge">Business</div>
-                            <div class="room-price">$299/night</div>
-                        </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Executive Suite</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Suite</span>
-                                <span class="room-size">55 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(4.6)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 2 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 1 King Bed</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 2 Baths</span>
-                            </div>
-                            <p class="room-description">Luxurious suite with separate living area, work space, and premium executive amenities.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Room 5 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Studio Apartment">
-                            <div class="room-price">$179/night</div>
-                        </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Studio Apartment</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Studio</span>
-                                <span class="room-size">40 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.2)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 2 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 1 Queen Bed</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 1 Bath</span>
-                            </div>
-                            <p class="room-description">Compact and efficient space with kitchenette, perfect for extended stays.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Room 6 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Presidential Suite">
-                            <div class="room-badge">Luxury</div>
-                            <div class="room-price">$499/night</div>
-                        </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Presidential Suite</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Suite</span>
-                                <span class="room-size">85 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span>(4.9)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 3 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 1 King Bed</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 2 Baths</span>
-                            </div>
-                            <p class="room-description">Our most luxurious offering with expansive space, premium furnishings, and exceptional service.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Room 7 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Ocean View Room">
-                            <div class="room-badge">View</div>
-                            <div class="room-price">$229/night</div>
-                        </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Ocean View Room</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Deluxe</span>
-                                <span class="room-size">38 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(4.7)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 2 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 1 King Bed</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 1 Bath</span>
-                            </div>
-                            <p class="room-description">Beautiful room with stunning ocean views, private balcony, and premium amenities.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Room 8 -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="room-card">
-                        <div class="room-img">
-                            <img src="https://images.unsplash.com/photo-1444201983204-c43cbd584d93?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Garden Suite">
-                            <div class="room-price">$169/night</div>
-                        </div>
-                        <div class="room-details">
-                            <h3 class="room-title">Garden Suite</h3>
-                            <div class="room-meta">
-                                <span class="room-type">Suite</span>
-                                <span class="room-size">42 m²</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.1)</span>
-                            </div>
-                            <div class="room-features">
-                                <span class="room-feature"><i class="fas fa-user-friends"></i> 2 Guests</span>
-                                <span class="room-feature"><i class="fas fa-bed"></i> 1 Queen Bed</span>
-                                <span class="room-feature"><i class="fas fa-bath"></i> 1 Bath</span>
-                            </div>
-                            <p class="room-description">Charming suite with direct access to the garden, perfect for nature lovers.</p>
-                            <a href="#" class="btn-book">Book Now</a>
-                        </div>
-                    </div>
-                </div>
+                    <?php endwhile; ?>
+                <?php else : ?>
+                    <p>No accommodations available.</p>
+                <?php endif; ?>
             </div>
         </div>
-        
+
+        <!-- Pagination -->
         <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
-                </li>
-            </ul>
+            <?php
+            echo paginate_links(array(
+                'total'     => $accommodations->max_num_pages,
+                'prev_text' => __('Previous'),
+                'next_text' => __('Next'),
+            ));
+            ?>
         </nav>
-    </div>
+        </div>
+     </div>
+  <?php wp_reset_postdata(); ?>
+
+    <?php 
+    // Astra theme hook before footer
+        if (function_exists('astra_footer_before')) {
+            astra_footer_before();
+        }
+    ?>
+
+    <?php 
+    // Astra theme footer
+        if (function_exists('astra_footer')) {
+            astra_footer();
+        }
+    ?>
+    <?php 
+    // Astra theme hook after footer
+    if (function_exists('astra_footer_after')) {
+        astra_footer_after();
+    }
+    ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -910,6 +774,6 @@
             });
         });
     </script>
+    <?php wp_footer(); ?>
 </body>
-
 </html>
