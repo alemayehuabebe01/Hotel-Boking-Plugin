@@ -35,6 +35,19 @@ if (!class_exists('Nehabi_Hotel_Admin_Pages')) {
             );
 
                //booking cpt submenu added here 
+            // remove_submenu_page( 
+            //     'edit.php?post_type=nehabi-hotel-booking', 
+            //     'edit.php?post_type=nehabi-hotel-booking' 
+            // );
+
+            // add_submenu_page(
+            //     'edit.php?post_type=nehabi-hotel-booking',
+            //     __('All Booking', 'hotel-booking'),
+            //     __('All Bookings', 'hotel-booking'),
+            //     'manage_options',
+            //     'accommodation-booking',
+            //     array($this, 'render_booking_page')
+            // );
             add_submenu_page(
                 'edit.php?post_type=nehabi-hotel-booking',
                 __('Payment Information', 'hotel-booking'),
@@ -104,7 +117,16 @@ if (!class_exists('Nehabi_Hotel_Admin_Pages')) {
             }
 
             require_once(Nehabi_Hotel_Booking_PATH . 'views/templates/nehabi-hotel-booking-customer.php');
+            
         }
+
+        // public function render_booking_page(){
+        //     if (!current_user_can('manage_options')) {
+        //         wp_die(__('You do not have sufficient permissions to access this page.'));
+        //     }
+
+        //     require_once(Nehabi_Hotel_Booking_PATH . 'views/templates/nehabi-hotel-all-bookings.php');
+        // }
 
         public function render_report_page() {
             if (!current_user_can('manage_options')) {
